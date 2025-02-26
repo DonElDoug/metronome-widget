@@ -1,0 +1,39 @@
+/* Import the custom font */
+@font-face {
+    font-family: 'Monocode';
+    src: url('font/Monocode.ttf') format('truetype');
+  }
+  
+  body {
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background: #f0f0f0; /* A light background to contrast your widget */
+  }
+  
+  .widget {
+    width: 400px;
+    height: 280px;
+    background-color: #262626;
+    border-radius: 20px; /* Rounded corners */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .controls {
+    display: flex;
+    align-items: center;
+    gap: 20px;  /* Space between icons and BPM display */
+  }
+  
+  /* Style for the BPM number */
+  #bpm-display {
+    font-family: 'Monocode', monospace;
+    font-size: 80px;
+    color: white;
+  }
+  
