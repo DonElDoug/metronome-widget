@@ -86,10 +86,10 @@ body {
 /* Reset Icon */
 .reset-icon {
   position: absolute;
-  width: 35px;
+  width: 25px;
   height: auto;
   cursor: pointer;
   display: none;
-  left: calc(50% + 50px/2 + 10px); /* Next to timer */
+  left: calc(50% + 50px/2 + 69px); /* Next to timer */
   top: calc(50% - 50px/2 - 20px - 72px/2); /* Align vertically */
 }
