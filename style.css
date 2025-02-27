@@ -14,7 +14,7 @@
 }
 
 body {
-  background-color: #000;
+  background-color: #262626;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -27,7 +27,7 @@ body {
   width: 400px;
   height: 280px;
   background-color: #262626;
-  border-radius: 20px;
+  border-radius: 0px;
   position: relative; /* Required for absolute positioning of play button */
   padding: 20px;
 }
