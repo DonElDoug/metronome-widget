@@ -1,23 +1,26 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Metronome Widget</title>
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css">
+  <script defer src="script.js"></script>
 </head>
 <body>
-  <div class="widget">
-    <div class="controls">
-      <!-- Minus Icon -->
-      <img src="icons/minus_icon.png" alt="Decrease BPM" id="decrease-btn" />
-      <!-- BPM Display -->
-      <span id="bpm-display">100</span>
-      <!-- Plus Icon -->
-      <img src="icons/plus_icon.png" alt="Increase BPM" id="increase-btn" />
+  <!-- Metronome Container -->
+  <div class="bpm_container">
+    <!-- BPM Display with Plus/Minus Icons -->
+    <div class="bpm-wrapper">
+      <img src="icons/minus_icon.png" alt="Decrease BPM" id="minusBtn" class="control-icon">
+      <div id="bpmDisplay" class="bpm-display">100</div>
+      <img src="icons/plus_icon.png" alt="Increase BPM" id="plusBtn" class="control-icon">
+    </div>
+
+    <!-- Play/Pause Button -->
+    <div class="play-button-container">
+      <img src="icons/play_icon.png" alt="Play" id="playPauseBtn" class="play-icon">
     </div>
   </div>
-
-  <script src="script.js"></script>
 </body>
 </html>

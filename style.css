@@ -1,39 +1,73 @@
-/* Import the custom font */
+/* 1. Import the custom font */
 @font-face {
-    font-family: 'Monocode';
-    src: url('font/Monocode.ttf') format('truetype');
-  }
-  
-  body {
-    margin: 0;
-    padding: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    background: #f0f0f0; /* A light background to contrast your widget */
-  }
-  
-  .widget {
-    width: 400px;
-    height: 280px;
-    background-color: #262626;
-    border-radius: 20px; /* Rounded corners */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-  
-  .controls {
-    display: flex;
-    align-items: center;
-    gap: 20px;  /* Space between icons and BPM display */
-  }
-  
-  /* Style for the BPM number */
-  #bpm-display {
-    font-family: 'Monocode', monospace;
-    font-size: 80px;
-    color: white;
-  }
-  
+  font-family: 'iAWriterMonoS';
+  src: url('font/iAWriterMonoS-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+/* 2. Reset / Base styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background-color: #000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  font-family: 'iAWriterMonoS', monospace;
+}
+
+/* 3. Main Metronome Container */
+.bpm_container {
+  width: 400px;
+  height: 280px;
+  background-color: #262626;
+  border-radius: 20px;
+  position: relative; /* Required for absolute positioning of play button */
+  padding: 20px;
+}
+
+/* 4. BPM Controls (Centered horizontally and vertically) */
+.bpm-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  position: absolute; /* Center within container */
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%); /* Perfect centering */
+}
+
+/* 5. BPM Text */
+.bpm-display {
+  font-size: 72px;
+  color: #ffffff;
+  text-align: center;
+  line-height: 1;
+}
+
+/* 6. Plus/Minus Icons */
+.control-icon {
+  width: 40px;
+  height: auto;
+  cursor: pointer;
+}
+
+/* 7. Play Button (Positioned 20px higher) */
+.play-button-container {
+  position: absolute;
+  bottom: 35px; /* Changed from 20px to 40px */
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.play-icon {
+  width: 40px;
+  height: auto;
+  cursor: pointer;
+}
