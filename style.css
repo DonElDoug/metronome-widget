@@ -71,3 +71,25 @@ body {
   height: auto;
   cursor: pointer;
 }
+
+
+/* Timer Display */
+.timer-display {
+  font-size: 35px;
+  color: #ffffff;
+  position: absolute;
+  top: calc(50% - 72px/2 - 50px/2 - 35px); /* 20px above BPM */
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+/* Reset Icon */
+.reset-icon {
+  position: absolute;
+  width: 35px;
+  height: auto;
+  cursor: pointer;
+  display: none;
+  left: calc(50% + 50px/2 + 10px); /* Next to timer */
+  top: calc(50% - 50px/2 - 20px - 72px/2); /* Align vertically */
+}

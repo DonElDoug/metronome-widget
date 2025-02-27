@@ -99,3 +99,4 @@ playPauseBtn.addEventListener('click', () => {
 
 // Initialize BPM display on page load
 updateBpmDisplay();
+

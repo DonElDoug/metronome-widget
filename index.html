@@ -10,13 +10,17 @@
 <body>
   <!-- Metronome Container -->
   <div class="bpm_container">
-    <!-- BPM Display with Plus/Minus Icons -->
+    <!-- Timer Display -->
+    <div class="timer-display">00:00</div>
+    <img src="icons/refresh_icon.png" class="reset-icon" style="display: none;">
+    
+    <!-- BPM Controls -->
     <div class="bpm-wrapper">
       <img src="icons/minus_icon.png" alt="Decrease BPM" id="minusBtn" class="control-icon">
       <div id="bpmDisplay" class="bpm-display">100</div>
       <img src="icons/plus_icon.png" alt="Increase BPM" id="plusBtn" class="control-icon">
     </div>
-
+    
     <!-- Play/Pause Button -->
     <div class="play-button-container">
       <img src="icons/play_icon.png" alt="Play" id="playPauseBtn" class="play-icon">
