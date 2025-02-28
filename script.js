@@ -138,6 +138,29 @@ playPauseBtn.addEventListener('click', () => {
 // Initialize BPM display
 updateBpmDisplay();
 
+// New: Tap function to update BPM by consecutive clicks on BPM text
+let tapTimes = []; // Store tap timestamps in ms
+const TAP_RESET_DELAY = 2000; // Reset tap sequence if gap > 2000ms
+
+bpmDisplay.addEventListener('click', () => {
+  const now = performance.now();
+  if (tapTimes.length && now - tapTimes[tapTimes.length - 1] > TAP_RESET_DELAY) {
+    tapTimes = [];
+  }
+  tapTimes.push(now);
+  if (tapTimes.length >= 2) {
+    const intervalSum = tapTimes[tapTimes.length - 1] - tapTimes[0];
+    const intervalsCount = tapTimes.length - 1;
+    const averageInterval = intervalSum / intervalsCount;
+    const newBpm = Math.round(60000 / averageInterval);
+    // Constrain newBpm within allowed range
+    bpm = Math.min(MAX_BPM, Math.max(MIN_BPM, newBpm));
+    updateBpmDisplay();
+    if (isPlaying) {
+      resetInterval();
+    }
+  }
+});
 
 // ----------------------------------------------------
 // 6) Timer Logic (with MS, formatted as MM:SS;ff)
