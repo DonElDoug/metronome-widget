@@ -95,15 +95,16 @@ body {
   top: calc(50% - 50px/2 - 28px - 72px/2); /* Align vertically */
 }
 
-/* New: Speed Icon styling */
+/* Adjusted Speed Icon styling */
 .speed-icon {
   position: absolute;
-  top: calc(50% - 90px); /* center vertically (30px icon height / 2) */
-  left: calc(50% - 118px); /* aligned with plus icon on the x-axis */
+  top: calc(50% - 96px);  /* Aligns horizontally with .timer-display */
+  left: calc(50% - 118px); /* Aligns vertically with the plus icon */
   height: 30px;
   width: auto;
   cursor: pointer;
 }
+
 
 /* Speed Mode Popup */
 .speed-mode-popup {
