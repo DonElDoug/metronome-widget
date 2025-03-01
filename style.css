@@ -99,7 +99,7 @@ body {
 .speed-icon {
   position: absolute;
   top: calc(50% - 90px); /* center vertically (30px icon height / 2) */
-  left: 20%;
+  left: calc(50% - 118px); /* aligned with plus icon on the x-axis */
   height: 30px;
   width: auto;
   cursor: pointer;
