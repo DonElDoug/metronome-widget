@@ -24,10 +24,10 @@ body {
 
 /* 3. Main Metronome Container */
 .bpm_container {
-  width: 425px;
-  height: 880px;
-  background-color: #363535;
-  border-radius: 20px;
+  width: 400px;
+  height: 280px;
+  background-color: #262626;
+  border-radius: 0px;
   position: relative; /* Required for absolute positioning of play button */
   padding: 20px;
 }
@@ -61,7 +61,7 @@ body {
 /* 7. Play Button (Positioned 20px higher) */
 .play-button-container {
   position: absolute;
-  bottom: 335px; /* Changed from 20px to 40px */
+  bottom: 30px; /* Changed from 20px to 40px */
   left: 50%;
   transform: translateX(-50%);
 }
@@ -97,8 +97,8 @@ body {
 /* New: Speed Icon styling */
 .speed-icon {
   position: absolute;
-  top: 350px;
-  left: 90px;
+  top: 50px;
+  left: 80px;
   height: 30px;
   width: auto;
   cursor: pointer;
