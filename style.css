@@ -11,6 +11,7 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
 }
 
 body {
@@ -82,6 +83,10 @@ body {
   top: calc(50% - 72px/2 - 50px/2 - 35px); /* 20px above BPM */
   left: 50%;
   transform: translateX(-50%);
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }
 
 /* Reset Icon */
@@ -93,6 +98,10 @@ body {
   display: none;
   left: calc(50% + 50px/2 + 78px); /* Next to timer */
   top: calc(50% - 50px/2 - 28px - 72px/2); /* Align vertically */
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }
 
 /* Adjusted Speed Icon styling */
@@ -104,7 +113,6 @@ body {
   width: auto;
   cursor: pointer;
 }
-
 
 /* Speed Mode Popup */
 .speed-mode-popup {
@@ -190,6 +198,10 @@ button#saveSpeedMode {
   cursor: pointer;
   font-family: 'iAWriterMonoS', monospace; /* Same font as everything else */
   transition: background-color 0.3s ease; /* Smooth hover effect */
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }
 
 button#saveSpeedMode:hover {
