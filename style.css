@@ -109,7 +109,7 @@ body {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 380px;
+  width: 330px;
   height: 330px;
   background-color: #191919;
   border-radius: 20px;
@@ -126,14 +126,17 @@ body {
 
 .popup-content {
   width: 100%;
-  text-align: center;
+  text-align: left; /* Align text to the left */
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-start; /* Align items to the start */
 }
 
 .popup-content h2 {
+  margin-top: 5px; /* Move the title down */
   margin-bottom: 20px; /* Add space below the title */
+  font-size: 19px; /* Reduce the font size */
+  align-self: center; /* Center the title */
 }
 
 .popup-content .input-row {
@@ -146,6 +149,7 @@ body {
 }
 
 .popup-content label {
+  margin-top: 5px; /* Move the label down */
   display: inline-block;
   text-align: left;
   margin-bottom: 5px;
@@ -153,6 +157,7 @@ body {
 }
 
 .popup-content input {
+  margin-top: 5px; /* Move the input down */
   width: 60px; /* Reduced width for 3 numbers */
   padding: 5px;
   margin-bottom: 10px;
@@ -166,14 +171,15 @@ body {
 
 .close-popup {
   position: absolute;
-  top: 10px;
+  top: 5px;
   right: 18px;
   cursor: pointer;
 }
 
 button#saveSpeedMode {
-  margin-top: 0px; /* Move the Save button up */
-  padding: 10px 20px;
+  margin-top:-5px; /* Move the Save button down */
+  padding: 8px 20px;
+  align-self: center; /* Center the button */
   background-color: #29be6f; /* Background color */
   color: #ffffff; /* White font */
   border: none;
