@@ -98,8 +98,8 @@ body {
 /* New: Speed Icon styling */
 .speed-icon {
   position: absolute;
-  top: 18%; /* Adjusted to be relative to the container's height */
-  left: 20%; /* Adjusted to be relative to the container's width */
+  top: calc(50% - 90px); /* center vertically (30px icon height / 2) */
+  left: 20%;
   height: 30px;
   width: auto;
   cursor: pointer;
