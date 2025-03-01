@@ -24,10 +24,10 @@ body {
 
 /* 3. Main Metronome Container */
 .bpm_container {
-  width: 400px;
-  height: 280px;
-  background-color: #262626;
-  border-radius: 0px;
+  width: 425px;
+  height: 880px;
+  background-color: #363535;
+  border-radius: 20px;
   position: relative; /* Required for absolute positioning of play button */
   padding: 20px;
 }
@@ -36,7 +36,7 @@ body {
 .bpm-wrapper {
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 30px;
   position: absolute; /* Center within container */
   top: 50%;
   left: 50%;
@@ -53,7 +53,7 @@ body {
 
 /* 6. Plus/Minus Icons */
 .control-icon {
-  width: 40px;
+  width: 35px;
   height: auto;
   cursor: pointer;
 }
@@ -61,7 +61,7 @@ body {
 /* 7. Play Button (Positioned 20px higher) */
 .play-button-container {
   position: absolute;
-  bottom: 35px; /* Changed from 20px to 40px */
+  bottom: 335px; /* Changed from 20px to 40px */
   left: 50%;
   transform: translateX(-50%);
 }
@@ -75,7 +75,7 @@ body {
 
 /* Timer Display */
 .timer-display {
-  font-size: 35px;
+  font-size: 30px;
   color: #ffffff;
   position: absolute;
   top: calc(50% - 72px/2 - 50px/2 - 35px); /* 20px above BPM */
@@ -90,6 +90,16 @@ body {
   height: auto;
   cursor: pointer;
   display: none;
-  left: calc(50% + 50px/2 + 69px); /* Next to timer */
-  top: calc(50% - 50px/2 - 20px - 72px/2); /* Align vertically */
+  left: calc(50% + 50px/2 + 78px); /* Next to timer */
+  top: calc(50% - 50px/2 - 28px - 72px/2); /* Align vertically */
+}
+
+/* New: Speed Icon styling */
+.speed-icon {
+  position: absolute;
+  top: 350px;
+  left: 90px;
+  height: 30px;
+  width: auto;
+  cursor: pointer;
 }

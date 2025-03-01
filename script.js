@@ -162,6 +162,16 @@ bpmDisplay.addEventListener('click', () => {
   }
 });
 
+// New: Toggle speed icon image on click
+const speedIcon = document.getElementById('speedIcon');
+speedIcon.addEventListener('click', () => {
+  if (speedIcon.getAttribute('src') === 'icons/speed_off.png') {
+    speedIcon.setAttribute('src', 'icons/speed_on.png');
+  } else {
+    speedIcon.setAttribute('src', 'icons/speed_off.png');
+  }
+});
+
 // ----------------------------------------------------
 // 6) Timer Logic (with MS, formatted as MM:SS;ff)
 // ----------------------------------------------------
