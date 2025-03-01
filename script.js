@@ -229,6 +229,43 @@ bpmDisplay.addEventListener('click', () => {
   }
 });
 
+// New: Inline editing using contenteditable (no input field)
+bpmDisplay.addEventListener('dblclick', function () {
+  bpmDisplay.setAttribute('contenteditable', 'true');
+  // Remove any default focus styles
+  bpmDisplay.style.backgroundColor = 'transparent';
+  bpmDisplay.style.outline = 'none';
+  bpmDisplay.focus();
+
+  // Auto-select all text inside the bpmDisplay
+  const range = document.createRange();
+  range.selectNodeContents(bpmDisplay);
+  const sel = window.getSelection();
+  sel.removeAllRanges();
+  sel.addRange(range);
+});
+
+bpmDisplay.addEventListener('blur', function () {
+  let newBpm = parseInt(bpmDisplay.textContent);
+  if (isNaN(newBpm)) newBpm = bpm;
+  if (newBpm < 30) newBpm = 30;
+  if (newBpm > 300) newBpm = 300;
+  bpm = newBpm;
+  bpmDisplay.textContent = bpm;
+  bpmDisplay.removeAttribute('contenteditable');
+
+  if (isPlaying) {
+    resetInterval();
+  }
+});
+
+bpmDisplay.addEventListener('keydown', function (e) {
+  if (e.key === 'Enter') {
+    e.preventDefault(); // Prevent newline
+    bpmDisplay.blur();
+  }
+});
+
 // New: Toggle speed icon image on click
 const speedIcon = document.getElementById('speedIcon');
 speedIcon.addEventListener('click', () => {
