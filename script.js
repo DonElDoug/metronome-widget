@@ -295,8 +295,9 @@ const speedIcon = document.getElementById('speedIcon');
 speedIcon.addEventListener('click', () => {
   if (speedIcon.getAttribute('src') === 'icons/speed_off.png') {
     speedIcon.setAttribute('src', 'icons/speed_on.png');
-    speedModePopup.style.display = 'block';
     loadSpeedModeSettings();
+    updateEstimatedTimeDisplay(); // Update the time immediately.
+    speedModePopup.style.display = 'block';
   } else {
     speedIcon.setAttribute('src', 'icons/speed_off.png');
     speedModePopup.style.display = 'none';
@@ -315,6 +316,53 @@ saveSpeedMode.addEventListener('click', () => {
   updateBpmDisplay();
   speedModePopup.style.display = 'none';
 });
+
+// New: Estimated time calculation for Speed Mode (refined)
+function calculateEstimatedTime(initial, final, increment, bars, clicks = 4) {
+    if (initial >= final) return 0;
+    let totalSeconds = 0;
+    for (let currentBpm = initial; currentBpm < final; currentBpm += increment) {
+        totalSeconds += (bars * clicks * 60) / currentBpm;
+    }
+    return totalSeconds;
+}
+
+// Existing estimated time display element.
+const estimatedTimeDisplay = document.getElementById('estimatedTime');
+
+// Update the estimated time display.
+function updateEstimatedTimeDisplay() {
+    const initBpm = parseInt(initialBpmInput.value) || 0;
+    const finBpm = parseInt(finalBpmInput.value) || 0;
+    const inc = parseInt(incrementInput.value) || 5;
+    const bars = parseInt(barsInput.value) || 4;
+    const totalSec = calculateEstimatedTime(initBpm, finBpm, inc, bars);
+    const minutes = Math.floor(totalSec / 60);
+    const seconds = Math.round(totalSec % 60);
+    estimatedTimeDisplay.textContent = `Estimated time: ${minutes} min ${seconds} sec`;
+}
+
+// Debounce the update function to allow smoother interaction.
+let debounceTimer;
+function updateEstimatedTimeDisplayDebounced() {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(updateEstimatedTimeDisplay, 300);
+}
+
+// Update estimated time when any Speed Mode input changes.
+initialBpmInput.addEventListener('input', updateEstimatedTimeDisplayDebounced);
+finalBpmInput.addEventListener('input', updateEstimatedTimeDisplayDebounced);
+incrementInput.addEventListener('input', updateEstimatedTimeDisplayDebounced);
+barsInput.addEventListener('input', updateEstimatedTimeDisplayDebounced);
+
+// Update estimated time immediately on every input change.
+initialBpmInput.addEventListener('input', updateEstimatedTimeDisplay);
+finalBpmInput.addEventListener('input', updateEstimatedTimeDisplay);
+incrementInput.addEventListener('input', updateEstimatedTimeDisplay);
+barsInput.addEventListener('input', updateEstimatedTimeDisplay);
+
+// Call once on load to show the correct value.
+updateEstimatedTimeDisplay();
 
 // ----------------------------------------------------
 // 6) Timer Logic (with MS, formatted as MM:SS;ff)
