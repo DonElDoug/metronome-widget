@@ -49,6 +49,8 @@ body {
   color: #ffffff;
   text-align: center;
   line-height: 1;
+  /* Ensure display has consistent width for 2 or 3 digits */
+  min-width: 3ch;
 }
 
 /* 6. Plus/Minus Icons */
@@ -74,7 +76,7 @@ body {
 
 /* Timer Display */
 .timer-display {
-  font-size: 30px;
+  font-size: 28px;
   color: #ffffff;
   position: absolute;
   top: calc(50% - 72px/2 - 50px/2 - 35px); /* 20px above BPM */
@@ -96,8 +98,8 @@ body {
 /* New: Speed Icon styling */
 .speed-icon {
   position: absolute;
-  top: 50px;
-  left: 80px;
+  top: 18%; /* Adjusted to be relative to the container's height */
+  left: 20%; /* Adjusted to be relative to the container's width */
   height: 30px;
   width: auto;
   cursor: pointer;
@@ -109,7 +111,7 @@ body {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 330px;
+  width: 310px;
   height: 330px;
   background-color: #191919;
   border-radius: 20px;
