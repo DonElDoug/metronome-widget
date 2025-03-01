@@ -46,6 +46,72 @@ function updateBpmDisplay() {
   bpmDisplay.textContent = bpm;
 }
 
+// Speed Mode Variables
+let speedModeEnabled = false;
+let initialBpm = 100;
+let finalBpm = 120;
+let speedIncrement = 5;
+let barsPerIncrement = 4;
+let clickCount = 0;
+
+// Elements
+const speedModePopup = document.getElementById('speedModePopup');
+const closePopup = document.getElementById('closePopup');
+const saveSpeedMode = document.getElementById('saveSpeedMode');
+const initialBpmInput = document.getElementById('initialBpm');
+const finalBpmInput = document.getElementById('finalBpm');
+const incrementInput = document.getElementById('increment');
+const barsInput = document.getElementById('bars');
+
+// Load Speed Mode settings from localStorage
+function loadSpeedModeSettings() {
+  initialBpm = parseInt(localStorage.getItem('initialBpm')) || 100;
+  finalBpm = parseInt(localStorage.getItem('finalBpm')) || 180;
+  speedIncrement = parseInt(localStorage.getItem('increment')) || 5;
+  barsPerIncrement = parseInt(localStorage.getItem('bars')) || 16;
+
+  initialBpmInput.value = initialBpm;
+  finalBpmInput.value = finalBpm;
+  incrementInput.value = speedIncrement;
+  barsInput.value = barsPerIncrement;
+}
+
+// Save Speed Mode settings to localStorage
+function saveSpeedModeSettings() {
+  initialBpm = parseInt(initialBpmInput.value);
+  finalBpm = parseInt(finalBpmInput.value);
+  speedIncrement = parseInt(incrementInput.value);
+  barsPerIncrement = parseInt(barsInput.value);
+
+  localStorage.setItem('initialBpm', initialBpm);
+  localStorage.setItem('finalBpm', finalBpm);
+  localStorage.setItem('increment', speedIncrement);
+  localStorage.setItem('bars', barsPerIncrement);
+}
+
+// Increment BPM logic
+function incrementBpm() {
+  if (speedModeEnabled && isPlaying) {
+    clickCount++;
+    if (clickCount >= barsPerIncrement * 4) {
+      clickCount = 0;
+      bpm = Math.min(finalBpm, bpm + speedIncrement);
+      updateBpmDisplay();
+      resetInterval();
+      if (bpm >= finalBpm) {
+        stopMetronome();
+        bpm = initialBpm;
+        updateBpmDisplay();
+        speedModeEnabled = false;
+        speedIcon.setAttribute('src', 'icons/speed_off.png');
+        fluteAudio.currentTime = 0;
+        fluteAudio.play();
+        currentMode = MODE_0;
+      }
+    }
+  }
+}
+
 function resetInterval() {
   if (intervalId) {
     clearInterval(intervalId);
@@ -54,6 +120,7 @@ function resetInterval() {
   intervalId = setInterval(() => {
     clickAudio.currentTime = 0;
     clickAudio.play();
+    incrementBpm();
   }, intervalMs);
 }
 
@@ -167,9 +234,25 @@ const speedIcon = document.getElementById('speedIcon');
 speedIcon.addEventListener('click', () => {
   if (speedIcon.getAttribute('src') === 'icons/speed_off.png') {
     speedIcon.setAttribute('src', 'icons/speed_on.png');
+    speedModePopup.style.display = 'block';
+    loadSpeedModeSettings();
   } else {
     speedIcon.setAttribute('src', 'icons/speed_off.png');
+    speedModePopup.style.display = 'none';
+    speedModeEnabled = false;
   }
+});
+
+closePopup.addEventListener('click', () => {
+  speedModePopup.style.display = 'none';
+});
+
+saveSpeedMode.addEventListener('click', () => {
+  saveSpeedModeSettings();
+  speedModeEnabled = true;
+  bpm = initialBpm;
+  updateBpmDisplay();
+  speedModePopup.style.display = 'none';
 });
 
 // ----------------------------------------------------
