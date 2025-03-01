@@ -112,14 +112,38 @@ function incrementBpm() {
   }
 }
 
+// Initialize AudioContext (mobile browsers require a user gesture to resume)
+const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+let clickBuffer = null;
+
+// Preload click sound into an AudioBuffer
+fetch('audio/click.wav')
+  .then(response => response.arrayBuffer())
+  .then(arrayBuffer => audioContext.decodeAudioData(arrayBuffer))
+  .then(buffer => { clickBuffer = buffer; })
+  .catch(err => console.error('Error loading click sound:', err));
+
+function playClickSound() {
+  // Ensure the audio context is running
+  if (audioContext.state !== 'running') {
+    audioContext.resume();
+  }
+  if (clickBuffer) {
+    const source = audioContext.createBufferSource();
+    source.buffer = clickBuffer;
+    source.connect(audioContext.destination);
+    source.start(0);
+  }
+}
+
 function resetInterval() {
   if (intervalId) {
     clearInterval(intervalId);
   }
   const intervalMs = 60000 / bpm;
   intervalId = setInterval(() => {
-    clickAudio.currentTime = 0;
-    clickAudio.play();
+    // Use Web Audio API for precise timing
+    playClickSound();
     incrementBpm();
   }, intervalMs);
 }
