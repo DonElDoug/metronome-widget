@@ -337,9 +337,10 @@ speedIcon.addEventListener('click', (e) => {
     speedIcon.dataset.swiped = "false";
     return;
   }
-
+  
   const currentSrc = speedIcon.getAttribute('src');
-  // Toggle speed mode on/off
+  
+  // Activate Speed Mode (from off to on)
   if (currentSrc.includes('speed_off.png')) {
     speedIcon.setAttribute('src', 'icons/speed_on.png');
     speedIcon.dataset.mode = "speed";
@@ -347,31 +348,35 @@ speedIcon.addEventListener('click', (e) => {
     loadSpeedModeSettings();
     updateEstimatedTimeDisplay();
     speedModePopup.style.display = 'block';
-
+    
     // Always reset to MODE_0 and clear timer
     currentMode = MODE_0;
     timerMs = 0;
     setTimerDisplay(timerMs);
-
+    
     randomModeEnabled = false; // ensure random mode is off
 
+  // Deactivate Speed Mode (from on to off) ONLY when metronome is paused
   } else if (currentSrc.includes('speed_on.png')) {
+    if (isPlaying) return; // disable deactivation when running
     speedIcon.setAttribute('src', 'icons/speed_off.png');
     speedIcon.dataset.state = "off";
     speedModePopup.style.display = 'none';
     speedModeEnabled = false;
-
+    
+  // Activate Random Mode (from off to on)
   } else if (currentSrc.includes('random_off.png')) {
     speedIcon.setAttribute('src', 'icons/random_on.png');
     speedIcon.dataset.mode = "random";
     speedIcon.dataset.state = "on";
-
     loadRandomModeSettings();
     buildRandomSilencePattern();
     randomModeEnabled = true;
     randomModePopup.style.display = 'block';
 
+  // Deactivate Random Mode (from on to off) ONLY when metronome is paused
   } else if (currentSrc.includes('random_on.png')) {
+    if (isPlaying) return; // disable deactivation when running
     speedIcon.setAttribute('src', 'icons/random_off.png');
     speedIcon.dataset.state = "off";
     randomModePopup.style.display = 'none';
