@@ -290,18 +290,38 @@ bpmDisplay.addEventListener('keydown', function (e) {
   }
 });
 
-// New: Toggle speed icon image on click
+// New: Toggle speed icon image on click, unless a swipe was detected
 const speedIcon = document.getElementById('speedIcon');
-speedIcon.addEventListener('click', () => {
-  if (speedIcon.getAttribute('src') === 'icons/speed_off.png') {
+speedIcon.addEventListener('click', (e) => {
+  // If a swipe gesture just occurred, ignore this click
+  if (speedIcon.dataset.swiped === "true") {
+    speedIcon.dataset.swiped = "false";
+    return;
+  }
+
+  const currentSrc = speedIcon.getAttribute('src');
+  // Toggle speed mode on/off
+  if (currentSrc.includes('speed_off.png')) {
     speedIcon.setAttribute('src', 'icons/speed_on.png');
+    speedIcon.dataset.mode = "speed";
+    speedIcon.dataset.state = "on";
     loadSpeedModeSettings();
-    updateEstimatedTimeDisplay(); // Update the time immediately.
+    updateEstimatedTimeDisplay();
     speedModePopup.style.display = 'block';
-  } else {
+  } else if (currentSrc.includes('speed_on.png')) {
     speedIcon.setAttribute('src', 'icons/speed_off.png');
+    speedIcon.dataset.state = "off";
     speedModePopup.style.display = 'none';
     speedModeEnabled = false;
+  } else if (currentSrc.includes('random_off.png')) {
+    speedIcon.setAttribute('src', 'icons/random_on.png');
+    speedIcon.dataset.mode = "random";
+    speedIcon.dataset.state = "on";
+    // TODO: Add any “random” mode logic
+  } else if (currentSrc.includes('random_on.png')) {
+    speedIcon.setAttribute('src', 'icons/random_off.png');
+    speedIcon.dataset.state = "off";
+    // TODO: Disable “random” mode logic
   }
 });
 
@@ -478,3 +498,62 @@ function showResetIcon() {
 function hideResetIcon() {
   resetIcon.style.display = 'none';
 }
+// ---------------------
+// 8) Swipe Toggle Function for Speed Icon (Improved)
+// ---------------------
+(function () {
+  const icon = speedIcon;
+  icon.style.touchAction = 'none';
+
+  let swipeStartX = null;
+  let isDragging = false;
+
+  // Lowered threshold for easier toggling (px to drag before changing mode)
+  const SWIPE_THRESHOLD = 30;
+
+  // Remove any transitions when starting to drag
+  icon.addEventListener('pointerdown', (e) => {
+    swipeStartX = e.clientX;
+    isDragging = false;
+    icon.setPointerCapture(e.pointerId);
+    icon.style.transition = 'none';
+  });
+
+  // Move the icon as you drag
+  icon.addEventListener('pointermove', (e) => {
+    if (swipeStartX === null) return;
+    const deltaX = e.clientX - swipeStartX;
+    isDragging = true;
+    icon.style.transform = `translateX(${deltaX}px)`;
+    e.preventDefault();
+  });
+
+  // Decide whether to toggle mode when releasing
+  icon.addEventListener('pointerup', handlePointerEnd);
+  icon.addEventListener('pointercancel', handlePointerEnd);
+
+  function handlePointerEnd(e) {
+    const deltaX = e.clientX - (swipeStartX || 0);
+    icon.style.transition = 'transform 0.2s ease-out';
+
+    if (isDragging && Math.abs(deltaX) >= SWIPE_THRESHOLD) {
+      icon.dataset.swiped = 'true';
+      const currentSrc = icon.getAttribute('src');
+      // Example: drag left or right toggles between speed/random
+      if (currentSrc.includes('speed_')) {
+        icon.setAttribute('src', currentSrc.includes('speed_off.png') 
+          ? 'icons/random_off.png' 
+          : 'icons/speed_off.png');
+      } else {
+        icon.setAttribute('src', currentSrc.includes('random_off.png') 
+          ? 'icons/speed_off.png'
+          : 'icons/random_off.png');
+      }
+    }
+
+    // Snap back
+    icon.style.transform = 'translateX(0px)';
+    swipeStartX = null;
+    isDragging = false;
+  }
+})();

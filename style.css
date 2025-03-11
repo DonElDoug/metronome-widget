@@ -107,11 +107,15 @@ body {
 /* Adjusted Speed Icon styling */
 .speed-icon {
   position: absolute;
-  top: calc(50% - 96px);  /* Aligns horizontally with .timer-display */
+  top: calc(50% - 90px);  /* Aligns horizontally with .timer-display */
   left: calc(50% - 118px); /* Aligns vertically with the plus icon */
-  height: 30px;
-  width: auto;
+  height: 30px; /* fixed height */
   cursor: pointer;
+}
+
+/* Remove or comment out the random-size class */
+.speed-icon.random-size {
+  /* no effect */
 }
 
 /* Speed Mode Popup */
