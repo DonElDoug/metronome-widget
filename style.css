@@ -113,10 +113,6 @@ body {
   cursor: pointer;
 }
 
-/* Remove or comment out the random-size class */
-.speed-icon.random-size {
-  /* no effect */
-}
 
 /* Speed Mode Popup */
 .speed-mode-popup {
