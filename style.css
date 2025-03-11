@@ -144,10 +144,11 @@ body {
 }
 
 .popup-content h2 {
-  margin-top: 5px; /* Move the title down */
-  margin-bottom: 20px; /* Add space below the title */
-  font-size: 19px; /* Reduce the font size */
-  align-self: center; /* Center the title */
+  margin-top: 5px;
+  margin-bottom: 20px;
+  font-size: 19px;
+  text-align: center; /* Center both Speed Mode and Random Silent Mode titles */
+  width: 100%;
 }
 
 .popup-content .input-row {
@@ -219,3 +220,25 @@ button#saveSpeedMode:hover {
   width: 100%;
   font-size: 14px;
 }
+
+/* Ensure the Random Mode "Save" button looks the same as Speed Mode */
+button#saveRandomMode {
+  margin-top: 
+  10px;
+  padding: 8px 20px;
+  align-self: center;
+  background-color: #29be6f; /* Same green */
+  color: #ffffff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-family: 'iAWriterMonoS', monospace;
+  transition: background-color 0.3s ease;
+}
+
+button#saveRandomMode:hover {
+  background-color: #24a65e; /* Darken on hover */
+}
+
+/* The .popup-content h2 styling already applies to both popups, 
+   so your <h2>Random Silent Mode Settings</h2> will match Speed Mode. */

@@ -136,16 +136,55 @@ function playClickSound() {
   }
 }
 
+// 1) Track whether random mode is enabled, plus bar counters
+let randomModeEnabled = false;
+let randomSilencePattern = [];
+let randomBarCounter = 0;
+let randomClickCounter = 0; // moves from 0..3 (each bar has 4 clicks)
+
+// 2) Extend the existing setInterval logic to handle random mode skipping
 function resetInterval() {
   if (intervalId) {
     clearInterval(intervalId);
   }
   const intervalMs = 60000 / bpm;
   intervalId = setInterval(() => {
-    // Use Web Audio API for precise timing
-    playClickSound();
+    // If random mode is enabled and the current bar is silent, skip the click
+    if (randomModeEnabled) {
+      // If “true,” that means this bar is silent => no click
+      if (!randomSilencePattern[randomBarCounter]) {
+        playClickSound();
+      }
+      randomClickCounter++;
+      if (randomClickCounter >= 4) {
+        randomClickCounter = 0;
+        randomBarCounter++;
+        // Instead of restarting, fully stop when all bars finished
+        if (randomBarCounter >= randomSilencePattern.length) {
+          stopMetronome();
+          randomModeEnabled = false;
+          speedIcon.setAttribute('src', 'icons/random_off.png');
+          fluteAudio.currentTime = 0;
+          fluteAudio.play();
+          currentMode = MODE_0;
+          showResetIcon(); // <-- Add this line
+          return; // Stop here
+        }
+      }
+    } else {
+      // Normal mode => always click
+      playClickSound();
+    }
     incrementBpm();
   }, intervalMs);
+}
+
+function buildRandomSilencePattern() {
+  const totalBars = parseInt(randomBarsInput.value) || 10;
+  const randomPercent = parseInt(randomPercentInput.value) || 50;
+  randomSilencePattern = getRandomBarsSilenced(totalBars, randomPercent);
+  randomBarCounter = 0;
+  randomClickCounter = 0;
 }
 
 function startMetronome() {
@@ -308,20 +347,35 @@ speedIcon.addEventListener('click', (e) => {
     loadSpeedModeSettings();
     updateEstimatedTimeDisplay();
     speedModePopup.style.display = 'block';
+
+    // Always reset to MODE_0 and clear timer
+    currentMode = MODE_0;
+    timerMs = 0;
+    setTimerDisplay(timerMs);
+
+    randomModeEnabled = false; // ensure random mode is off
+
   } else if (currentSrc.includes('speed_on.png')) {
     speedIcon.setAttribute('src', 'icons/speed_off.png');
     speedIcon.dataset.state = "off";
     speedModePopup.style.display = 'none';
     speedModeEnabled = false;
+
   } else if (currentSrc.includes('random_off.png')) {
     speedIcon.setAttribute('src', 'icons/random_on.png');
     speedIcon.dataset.mode = "random";
     speedIcon.dataset.state = "on";
-    // TODO: Add any “random” mode logic
+
+    loadRandomModeSettings();
+    buildRandomSilencePattern();
+    randomModeEnabled = true;
+    randomModePopup.style.display = 'block';
+
   } else if (currentSrc.includes('random_on.png')) {
     speedIcon.setAttribute('src', 'icons/random_off.png');
     speedIcon.dataset.state = "off";
-    // TODO: Disable “random” mode logic
+    randomModePopup.style.display = 'none';
+    randomModeEnabled = false;
   }
 });
 
@@ -483,7 +537,7 @@ timerDisplay.addEventListener('click', () => {
 
 // 7b) Reset icon (only relevant in MODE_2 when paused)
 resetIcon.addEventListener('click', () => {
-  if (!isPlaying && currentMode === MODE_2) {
+  if (!isPlaying) {
     // Reset => return to MODE_0
     timerMs = 0;
     setTimerDisplay(timerMs);
@@ -508,18 +562,20 @@ function hideResetIcon() {
   let swipeStartX = null;
   let isDragging = false;
 
-  // Lowered threshold for easier toggling (px to drag before changing mode)
   const SWIPE_THRESHOLD = 30;
 
   // Remove any transitions when starting to drag
   icon.addEventListener('pointerdown', (e) => {
+    // Only allow swiping when no mode is active (state "off")
+    if (icon.dataset.state !== "off") return;
+    
     swipeStartX = e.clientX;
     isDragging = false;
     icon.setPointerCapture(e.pointerId);
     icon.style.transition = 'none';
   });
 
-  // Move the icon as you drag
+  // Move the icon as you drag; only works if swipeStartX was set.
   icon.addEventListener('pointermove', (e) => {
     if (swipeStartX === null) return;
     const deltaX = e.clientX - swipeStartX;
@@ -533,19 +589,22 @@ function hideResetIcon() {
   icon.addEventListener('pointercancel', handlePointerEnd);
 
   function handlePointerEnd(e) {
+    // If swiping never started, exit early
+    if (swipeStartX === null) return;
+    
     const deltaX = e.clientX - (swipeStartX || 0);
     icon.style.transition = 'transform 0.2s ease-out';
 
     if (isDragging && Math.abs(deltaX) >= SWIPE_THRESHOLD) {
       icon.dataset.swiped = 'true';
       const currentSrc = icon.getAttribute('src');
-      // Example: drag left or right toggles between speed/random
+      // Toggle between speed and random only when swiping is allowed.
       if (currentSrc.includes('speed_')) {
-        icon.setAttribute('src', currentSrc.includes('speed_off.png') 
-          ? 'icons/random_off.png' 
+        icon.setAttribute('src', currentSrc.includes('speed_off.png')
+          ? 'icons/random_off.png'
           : 'icons/speed_off.png');
       } else {
-        icon.setAttribute('src', currentSrc.includes('random_off.png') 
+        icon.setAttribute('src', currentSrc.includes('random_off.png')
           ? 'icons/speed_off.png'
           : 'icons/random_off.png');
       }
@@ -557,3 +616,49 @@ function hideResetIcon() {
     isDragging = false;
   }
 })();
+
+// Random Mode elements
+const randomModePopup = document.getElementById('randomModePopup');
+const closeRandomPopup = document.getElementById('closeRandomPopup');
+const saveRandomMode = document.getElementById('saveRandomMode');
+const randomPercentInput = document.getElementById('randomPercent');
+const randomBarsInput = document.getElementById('randomBars');
+
+function loadRandomModeSettings() {
+  const storedRandomPercent = localStorage.getItem('randomPercent');
+  const storedRandomBars = localStorage.getItem('randomBars');
+  randomPercentInput.value = storedRandomPercent ? parseInt(storedRandomPercent) : 50;
+  randomBarsInput.value = storedRandomBars ? parseInt(storedRandomBars) : 10;
+}
+
+function saveRandomModeSettings() {
+  localStorage.setItem('randomPercent', randomPercentInput.value);
+  localStorage.setItem('randomBars', randomBarsInput.value);
+}
+
+// Returns an array of booleans (true => silent) for each bar. First bar is never silent.
+function getRandomBarsSilenced(totalBars, randomPercent) {
+  const result = new Array(totalBars).fill(false);
+  // First bar always hearable
+  const toMute = Math.floor((randomPercent / 100) * (totalBars - 1));
+  let indexes = [...Array(totalBars - 1).keys()].map(i => i + 1); // bars [1..(totalBars-1)]
+  // Shuffle array
+  for (let i = indexes.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [indexes[i], indexes[j]] = [indexes[j], indexes[i]];
+  }
+  // Mark first N as silent
+  indexes.slice(0, toMute).forEach(idx => result[idx] = true);
+  return result;
+}
+
+closeRandomPopup.addEventListener('click', () => {
+  randomModePopup.style.display = 'none';
+});
+
+saveRandomMode.addEventListener('click', () => {
+  saveRandomModeSettings();
+  buildRandomSilencePattern(); 
+  randomModeEnabled = true;   // Turn on random mode
+  randomModePopup.style.display = 'none';
+});
