@@ -5,12 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Metronome Widget</title>
   <link rel="stylesheet" href="style.css"/>
+  <!-- Load Speed Mode and Random Mode first -->
+  <script defer src="speed_mode.js"></script>
+  <script defer src="random_mode.js"></script>
   <script defer src="script.js"></script>
 </head>
 <body>
   <!-- Metronome Container -->
   <div class="bpm_container">
-    <!-- New: Speed Icon -->
+    <!-- Speed Icon -->
     <img src="icons/speed_off.png" id="speedIcon" class="speed-icon" alt="Mode Toggle" data-mode="speed" data-state="off" />
     <!-- Timer Display -->
     <div class="timer-display">00:00;00</div>
@@ -18,29 +21,21 @@
 
     <!-- BPM Controls -->
     <div class="bpm-wrapper">
-      <img
-        src="icons/minus_icon.png"
-        alt="Decrease BPM"
-        id="minusBtn"
-        class="control-icon"
-      />
+      <img src="icons/minus_icon.png" alt="Decrease BPM" id="minusBtn" class="control-icon" />
       <div id="bpmDisplay" class="bpm-display">100</div>
-      <img
-        src="icons/plus_icon.png"
-        alt="Increase BPM"
-        id="plusBtn"
-        class="control-icon"
-      />
+      <img src="icons/plus_icon.png" alt="Increase BPM" id="plusBtn" class="control-icon" />
     </div>
 
-    <!-- Play/Pause Button -->
+    <!-- Play/Pause Button with Circular Indicator -->
     <div class="play-button-container">
-      <img
-        src="icons/play_icon.png"
-        alt="Play"
-        id="playPauseBtn"
-        class="play-icon"
-      />
+      <div class="play-circle-container">
+        <svg class="progress-indicator" viewBox="0 0 100 100">
+          <circle class="progress-bg" cx="50" cy="50" r="45" fill="none" stroke="#ccc" stroke-width="5"></circle>
+          <circle class="progress-bar" cx="50" cy="50" r="45" fill="none" stroke="#29be6f" stroke-width="5"
+            stroke-dasharray="282.743" stroke-dashoffset="282.743"></circle>
+        </svg>
+        <img src="icons/play_icon.png" alt="Play" id="playPauseBtn" class="play-icon" />
+      </div>
     </div>
   </div>
 
@@ -66,13 +61,11 @@
         <input type="number" id="bars" value="16">
       </div>
       <button id="saveSpeedMode">Save</button>
-      <div id="estimatedTime" style="color: #ffffff; margin-top: 30px;">
-        Estimated time: 0 min
-      </div>
+      <div id="estimatedTime" style="color: #ffffff; margin-top: 30px;">Estimated time: 0 min</div>
     </div>
   </div>
 
-  <!-- Random Mode Popup (styled exactly like Speed Mode Popup) -->
+  <!-- Random Mode Popup (styled like Speed Mode Popup) -->
   <div id="randomModePopup" class="speed-mode-popup" style="display: none;">
     <div class="popup-content">
       <span id="closeRandomPopup" class="close-popup">&times;</span>

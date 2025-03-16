@@ -29,19 +29,19 @@ body {
   height: 280px;
   background-color: #262626;
   border-radius: 0px;
-  position: relative; /* Required for absolute positioning of play button */
+  position: relative;
   padding: 20px;
 }
 
-/* 4. BPM Controls (Centered horizontally and vertically) */
+/* 4. BPM Controls */
 .bpm-wrapper {
   display: flex;
   align-items: center;
   gap: 30px;
-  position: absolute; /* Center within container */
+  position: absolute;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%); /* Perfect centering */
+  transform: translate(-50%, -50%);
 }
 
 /* 5. BPM Text */
@@ -50,7 +50,6 @@ body {
   color: #ffffff;
   text-align: center;
   line-height: 1;
-  /* Ensure display has consistent width for 2 or 3 digits */
   min-width: 3ch;
 }
 
@@ -61,10 +60,10 @@ body {
   cursor: pointer;
 }
 
-/* 7. Play Button (Positioned 20px higher) */
+/* 7. Play Button */
 .play-button-container {
   position: absolute;
-  bottom: 30px; /* Changed from 20px to 40px */
+  bottom: 30px;
   left: 50%;
   transform: translateX(-50%);
 }
@@ -80,12 +79,9 @@ body {
   font-size: 28px;
   color: #ffffff;
   position: absolute;
-  top: calc(50% - 72px/2 - 50px/2 - 35px); /* 20px above BPM */
+  top: calc(50% - 36px - 17.5px - 35px);
   left: 50%;
   transform: translateX(-50%);
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
   user-select: none;
 }
 
@@ -96,20 +92,17 @@ body {
   height: auto;
   cursor: pointer;
   display: none;
-  left: calc(50% + 50px/2 + 78px); /* Next to timer */
-  top: calc(50% - 50px/2 - 28px - 72px/2); /* Align vertically */
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
+  left: calc(50% + 25px + 78px);
+  top: calc(50% - 25px - 28px - 36px);
   user-select: none;
 }
 
-/* Adjusted Speed Icon styling */
+/* Speed Icon */
 .speed-icon {
   position: absolute;
-  top: calc(50% - 90px);  /* Aligns horizontally with .timer-display */
-  left: calc(50% - 118px); /* Aligns vertically with the plus icon */
-  height: 30px; /* fixed height */
+  top: calc(50% - 90px);
+  left: calc(50% - 118px);
+  height: 30px;
   cursor: pointer;
 }
 
@@ -132,21 +125,22 @@ body {
   padding: 20px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
   animation: fadeIn 0.3s ease-in-out;
+  z-index: 1000;
 }
 
 .popup-content {
   width: 100%;
-  text-align: left; /* Align text to the left */
+  text-align: left;
   display: flex;
   flex-direction: column;
-  align-items: flex-start; /* Align items to the start */
+  align-items: flex-start;
 }
 
 .popup-content h2 {
   margin-top: 5px;
   margin-bottom: 20px;
   font-size: 19px;
-  text-align: center; /* Center both Speed Mode and Random Silent Mode titles */
+  text-align: center;
   width: 100%;
 }
 
@@ -156,11 +150,11 @@ body {
   align-items: center;
   width: 100%;
   margin-bottom: 10px;
-  padding: 0 35px; /* Add padding to align with the title */
+  padding: 0 35px;
 }
 
 .popup-content label {
-  margin-top: 5px; /* Move the label down */
+  margin-top: 5px;
   display: inline-block;
   text-align: left;
   margin-bottom: 5px;
@@ -168,15 +162,15 @@ body {
 }
 
 .popup-content input {
-  margin-top: 5px; /* Move the input down */
-  width: 60px; /* Reduced width for 3 numbers */
+  margin-top: 5px;
+  width: 60px;
   padding: 5px;
   margin-bottom: 10px;
-  border: 1px solid #888888; /* Bright grey border */
+  border: 1px solid #888888;
   border-radius: 5px;
   font-family: 'iAWriterMonoS', monospace;
-  background-color: #333333; /* Dark input background */
-  color: #ffffff; /* White font */
+  background-color: #333333;
+  color: #ffffff;
   text-align: center;
 }
 
@@ -188,24 +182,21 @@ body {
 }
 
 button#saveSpeedMode {
-  margin-top:-5px; /* Move the Save button down */
+  margin-top: -5px;
   padding: 8px 20px;
-  align-self: center; /* Center the button */
-  background-color: #29be6f; /* Background color */
-  color: #ffffff; /* White font */
+  align-self: center;
+  background-color: #29be6f;
+  color: #ffffff;
   border: none;
   border-radius: 5px;
   cursor: pointer;
-  font-family: 'iAWriterMonoS', monospace; /* Same font as everything else */
-  transition: background-color 0.3s ease; /* Smooth hover effect */
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
+  font-family: 'iAWriterMonoS', monospace;
+  transition: background-color 0.3s ease;
   user-select: none;
 }
 
 button#saveSpeedMode:hover {
-  background-color: #24a65e; /* Darker shade on hover */
+  background-color: #24a65e;
 }
 
 @keyframes fadeIn {
@@ -220,13 +211,11 @@ button#saveSpeedMode:hover {
   font-size: 14px;
 }
 
-/* Ensure the Random Mode "Save" button looks the same as Speed Mode */
 button#saveRandomMode {
-  margin-top: 
-  10px;
+  margin-top: 10px;
   padding: 8px 20px;
   align-self: center;
-  background-color: #29be6f; /* Same green */
+  background-color: #29be6f;
   color: #ffffff;
   border: none;
   border-radius: 5px;
@@ -236,8 +225,44 @@ button#saveRandomMode {
 }
 
 button#saveRandomMode:hover {
-  background-color: #24a65e; /* Darken on hover */
+  background-color: #24a65e;
 }
 
-/* The .popup-content h2 styling already applies to both popups, 
-   so your <h2>Random Silent Mode Settings</h2> will match Speed Mode. */
+/* Container for play icon with progress indicator */
+.play-circle-container {
+  position: relative;
+  width: 60px;          /* default size; may be updated via JS */
+  height: 60px;
+  overflow: visible;    /* allow the stroke to render outside the container */
+}
+
+/* SVG progress indicator styling */
+.progress-indicator {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg); /* start progress at top (12 o'clock) */
+  pointer-events: none;
+  overflow: visible;         /* ensure the entire circle is displayed */
+}
+
+/* Styling for the progress bar (the green circle) */
+.progress-bar {
+  stroke: #30db80;
+  stroke-width: 7px;
+  fill: none;
+  transition: stroke-dashoffset 0.3s ease;
+}
+
+/* Center the play/pause icon over the progress indicator */
+.play-circle-container .play-icon {
+  position: absolute;
+  z-index: 2;
+  width: 40px;  /* desired icon size */
+  height: auto;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
