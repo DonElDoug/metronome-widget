@@ -1,4 +1,4 @@
-/* Import Custom Font */
+/* 1. Import the custom font */
 @font-face {
   font-family: 'iAWriterMonoS';
   src: url('font/iAWriterMonoS-Regular.ttf') format('truetype');
@@ -6,16 +6,7 @@
   font-style: normal;
 }
 
-/* CSS Variables */
-:root {
-  --bg-color: #262626;
-  --text-color: #ffffff;
-  --accent-color: #29be6f;
-  --popup-bg: #191919;
-  --popup-text: #ffffff;
-}
-
-/* Reset */
+/* 2. Reset / Base styles */
 * {
   margin: 0;
   padding: 0;
@@ -24,272 +15,117 @@
 }
 
 body {
-  background: linear-gradient(135deg, var(--bg-color) 0%, color-mix(in srgb, var(--bg-color) 85%, black) 100%);
+  background-color: #262626;
   display: flex;
   justify-content: center;
   align-items: center;
   height: 100vh;
   font-family: 'iAWriterMonoS', monospace;
-  color: var(--text-color);
-  transition: background 0.3s ease, color 0.3s ease;
-  overflow: hidden;
 }
 
-/* Main Container */
+/* 3. Main Metronome Container */
 .bpm_container {
-  width: 100%;
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
+  width: 400px;
+  height: 280px;
+  background-color: #262626;
+  border-radius: 0px;
   position: relative;
+  padding: 20px;
 }
 
-/* Top Bar */
-.top-bar {
+/* 4. BPM Controls */
+.bpm-wrapper {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 24px 32px;
+  gap: 30px;
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 100;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
 
-.icon-button {
-  width: 52px;
-  height: 52px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 14px;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  backdrop-filter: blur(20px);
-}
-
-.icon-button:hover {
-  background: rgba(255, 255, 255, 0.12);
-  border-color: rgba(255, 255, 255, 0.15);
-  transform: translateY(-2px);
-}
-
-.icon-button[data-state="on"] {
-  background: color-mix(in srgb, var(--accent-color) 25%, transparent);
-  border-color: var(--accent-color);
-  box-shadow: 0 0 24px color-mix(in srgb, var(--accent-color) 30%, transparent);
-  color: var(--accent-color);
-}
-
-.icon-button svg {
-  width: 24px;
-  height: 24px;
-  stroke: currentColor;
-  stroke-width: 2px;
-  fill: none;
-}
-
-.timer-display {
-  font-size: 24px;
-  font-weight: 300;
-  opacity: 0.6;
-  letter-spacing: 0.1em;
-  font-variant-numeric: tabular-nums;
-  transition: opacity 0.3s ease;
-  user-select: none;
-}
-
-.timer-display:hover {
-  opacity: 0.9;
-}
-
-/* Main Content - Centered */
-.main-content {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 48px;
-}
-
-/* BPM Section */
-.bpm-section {
-  display: flex;
-  align-items: center;
-  gap: 40px;
-}
-
-.bpm-control {
-  width: 64px;
-  height: 64px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 20px;
-  cursor: pointer;
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  backdrop-filter: blur(20px);
-}
-
-.bpm-control:hover {
-  background: rgba(255, 255, 255, 0.12);
-  border-color: rgba(255, 255, 255, 0.2);
-  transform: scale(1.05);
-}
-
-.bpm-control:active {
-  transform: scale(0.95);
-}
-
-.bpm-control svg {
-  width: 28px;
-  height: 28px;
-  stroke: currentColor;
-  stroke-width: 2.5px;
-  fill: none;
-}
-
+/* 5. BPM Text */
 .bpm-display {
-  font-size: 128px;
-  font-weight: 200;
-  letter-spacing: -0.04em;
+  font-size: 72px;
+  color: #ffffff;
   text-align: center;
+  line-height: 1;
   min-width: 3ch;
-  cursor: text;
-  transition: all 0.3s ease;
-  font-variant-numeric: tabular-nums;
-  text-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+/* 6. Plus/Minus Icons */
+.control-icon {
+  width: 35px;
+  height: auto;
+  cursor: pointer;
+}
+
+/* 7. Play Button */
+.play-button-container {
+  position: absolute;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.play-icon {
+  width: 40px;
+  height: auto;
+  cursor: pointer;
+}
+
+/* Timer Display */
+.timer-display {
+  font-size: 28px;
+  color: #ffffff;
+  position: absolute;
+  top: calc(50% - 36px - 17.5px - 35px);
+  left: 50%;
+  transform: translateX(-50%);
   user-select: none;
 }
 
-.bpm-display:focus {
-  outline: none;
-  color: var(--accent-color);
-}
-
-/* Play Button Container */
-.play-container {
-  position: relative;
-  width: 120px;
-  height: 120px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.progress-ring {
+/* Reset Icon */
+.reset-icon {
   position: absolute;
-  width: 120px;
-  height: 120px;
-  transform: rotate(-90deg);
-  pointer-events: none;
-}
-
-.progress-ring-bg {
-  fill: none;
-  stroke: rgba(255, 255, 255, 0.08);
-  stroke-width: 3;
-}
-
-.progress-ring-bar {
-  fill: none;
-  stroke: var(--accent-color);
-  stroke-width: 3;
-  stroke-dasharray: 339.292;
-  stroke-dashoffset: 339.292;
-  transition: stroke-dashoffset 0.3s ease;
-  filter: drop-shadow(0 0 8px var(--accent-color));
-}
-
-.play-button {
-  width: 96px;
-  height: 96px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 50%;
+  width: 25px;
+  height: auto;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  backdrop-filter: blur(20px);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-  z-index: 10;
+  display: none;
+  left: calc(50% + 25px + 78px);
+  top: calc(50% - 25px - 28px - 36px);
+  user-select: none;
 }
 
-.play-button:hover {
-  background: rgba(255, 255, 255, 0.15);
-  border-color: rgba(255, 255, 255, 0.25);
-  transform: scale(1.05);
-  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.3);
-}
-
-.play-button:active {
-  transform: scale(0.98);
-}
-
-.play-button svg {
-  width: 36px;
-  height: 36px;
-  stroke: none;
-  fill: currentColor;
-  transform: translateX(3px);
-}
-
-/* Reset Button */
-.reset-button {
+/* Speed Icon */
+.speed-icon {
   position: absolute;
-  bottom: 80px;
-  width: 48px;
-  height: 48px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 12px;
+  top: calc(50% - 90px);
+  left: calc(50% - 118px);
+  height: 30px;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  backdrop-filter: blur(20px);
 }
 
-.reset-button:hover {
-  background: rgba(255, 255, 255, 0.12);
-  transform: rotate(-180deg) scale(1.05);
-}
-
-.reset-button svg {
-  width: 22px;
-  height: 22px;
-  stroke: currentColor;
-  stroke-width: 2px;
-  fill: none;
-}
-
-/* Popups */
+/* Speed Mode Popup */
 .speed-mode-popup {
   position: fixed;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 90%;
-  max-width: 380px;
-  padding: 32px;
-  background: var(--popup-bg);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  width: 310px;
+  height: 330px;
+  background-color: #191919;
   border-radius: 20px;
   font-family: 'iAWriterMonoS', monospace;
-  color: var(--popup-text);
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-  animation: fadeIn 0.2s ease-out;
+  color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+  animation: fadeIn 0.3s ease-in-out;
   z-index: 1000;
-  backdrop-filter: blur(40px);
 }
 
 .popup-content {
@@ -297,194 +133,456 @@ body {
   text-align: left;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  align-items: flex-start;
 }
 
 .popup-content h2 {
-  margin: 0;
-  font-size: 22px;
-  font-weight: 500;
+  margin-top: 5px;
+  margin-bottom: 20px;
+  font-size: 19px;
   text-align: center;
-  letter-spacing: -0.5px;
+  width: 100%;
 }
 
 .popup-content .input-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 16px;
+  width: 100%;
+  margin-bottom: 10px;
+  padding: 0 35px;
 }
 
 .popup-content label {
-  font-size: 15px;
-  opacity: 0.85;
+  margin-top: 5px;
+  display: inline-block;
+  text-align: left;
+  margin-bottom: 5px;
+  width: 60%;
 }
 
 .popup-content input {
-  width: 80px;
-  padding: 10px 12px;
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 8px;
+  margin-top: 5px;
+  width: 60px;
+  padding: 5px;
+  margin-bottom: 10px;
+  border: 1px solid #888888;
+  border-radius: 5px;
   font-family: 'iAWriterMonoS', monospace;
-  background: rgba(255, 255, 255, 0.05);
-  color: var(--popup-text);
+  background-color: #333333;
+  color: #ffffff;
   text-align: center;
-  font-size: 16px;
-  transition: all 0.2s ease;
-}
-
-.popup-content input:focus {
-  outline: none;
-  border-color: var(--accent-color);
-  background: rgba(255, 255, 255, 0.08);
 }
 
 .close-popup {
   position: absolute;
-  top: 20px;
-  right: 20px;
+  top: 5px;
+  right: 18px;
   cursor: pointer;
-  opacity: 0.5;
-  transition: opacity 0.2s;
-  font-size: 28px;
-  line-height: 1;
-  width: 32px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 8px;
 }
 
-.close-popup:hover {
-  opacity: 1;
-  background: rgba(255, 255, 255, 0.1);
-}
-
-button#saveSpeedMode,
-button#saveRandomMode {
-  margin-top: 8px;
-  padding: 12px 32px;
-  background: var(--accent-color);
+button#saveSpeedMode {
+  margin-top: -5px;
+  padding: 8px 20px;
+  align-self: center;
+  background-color: #29be6f;
   color: #ffffff;
   border: none;
-  border-radius: 10px;
+  border-radius: 5px;
   cursor: pointer;
   font-family: 'iAWriterMonoS', monospace;
-  font-size: 15px;
-  font-weight: 500;
-  transition: all 0.2s ease;
-  align-self: center;
+  transition: background-color 0.3s ease;
+  user-select: none;
 }
 
-button#saveSpeedMode:hover,
-button#saveRandomMode:hover {
-  background: color-mix(in srgb, var(--accent-color) 85%, black);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(41, 190, 111, 0.3);
-}
-
-button#saveSpeedMode:active,
-button#saveRandomMode:active {
-  transform: translateY(0);
-}
-
-#estimatedTime {
-  text-align: center;
-  font-size: 14px;
-  opacity: 0.7;
+button#saveSpeedMode:hover {
+  background-color: #24a65e;
 }
 
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translate(-50%, -48%);
-  }
-  to {
-    opacity: 1;
-    transform: translate(-50%, -50%);
-  }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
-/* Color Picker Sections */
-.color-section {
+#estimatedTime {
+  margin-top: 15px;
+  text-align: center;
   width: 100%;
-}
-
-.color-section-title {
   font-size: 14px;
-  margin-bottom: 12px;
-  opacity: 0.7;
 }
 
-.color-picker-container {
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-
-.color-swatch {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
+button#saveRandomMode {
+  margin-top: 10px;
+  padding: 8px 20px;
+  align-self: center;
+  background-color: #29be6f;
+  color: #ffffff;
+  border: none;
+  border-radius: 5px;
   cursor: pointer;
-  border: 2px solid rgba(255, 255, 255, 0.2);
-  transition: all 0.2s ease;
+  font-family: 'iAWriterMonoS', monospace;
+  transition: background-color 0.3s ease;
 }
 
-.color-swatch:hover {
-  transform: scale(1.1);
-  border-color: rgba(255, 255, 255, 0.4);
+button#saveRandomMode:hover {
+  background-color: #24a65e;
 }
 
-.color-swatch.active {
-  border-color: var(--accent-color);
-  border-width: 3px;
-  transform: scale(1.15);
-  box-shadow: 0 0 16px var(--accent-color);
-}
-
-.custom-color-wrapper {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  overflow: hidden;
+/* Container for play icon with progress indicator */
+.play-circle-container {
   position: relative;
-  cursor: pointer;
-  border: 2px solid rgba(255, 255, 255, 0.2);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: conic-gradient(
-    red,
-    yellow,
-    lime,
-    aqua,
-    blue,
-    magenta,
-    red
+  width: 60px;          /* default size; may be updated via JS */
+  height: 60px;
+  overflow: visible;    /* allow the stroke to render outside the container */import React, { useEffect, useMemo, useState } from "react";
+
+// ===== LEAD‑SHEET CHORD PAD (Musician‑first, minimal, error‑free) =====
+// • Left rail: section name + free bar count (1–128) + ✚ (double bars)
+// • Right: 4 bars per row, compact. Each bar has 4 beat slots (click = Roman menu)
+// • Left‑click beat: choose Roman (I, ii, iii, IV, V, vi, viiø)
+// • Right‑click beat or chord: extensions menu (superscript)
+// • Right‑click bar background: repeat menu (None, ||:, :|| ×2/×3/×4)
+// • Hover a chord to reveal × to clear that slot
+
+const ROMANS = ["I", "ii", "iii", "IV", "V", "vi", "viiø"];
+const EXTENSIONS = ["", "7", "maj7", "m7", "6", "9", "11", "13", "sus2", "sus4", "add9", "dim", "ø7"];
+
+export default function App() {
+  // Sections state
+  const [sections, setSections] = useState([
+    { id: "s1", name: "Intro", bars: 4 },
+    { id: "s2", name: "Verse", bars: 8 },
+    { id: "s3", name: "Chorus", bars: 8 },
+  ]);
+  const [title, setTitle] = useState("Untitled Chart");
+
+  // Compute offsets and totals
+  const sectionOffsets = useMemo(() => {
+    const out = [];
+    let acc = 0;
+    for (const s of sections) {
+      out.push({ id: s.id, name: s.name, start: acc, bars: s.bars });
+      acc += s.bars;
+    }
+    return out;
+  }, [sections]);
+  const totalBars = useMemo(() => sectionOffsets.reduce((n, s) => n + s.bars, 0), [sectionOffsets]);
+
+  // Progression (bars × 4 slots) and Repeat markers per bar
+  const SLOTS_PER_BAR = 4;
+  const emptyBar = () => Array.from({ length: SLOTS_PER_BAR }, () => null);
+  const [prog, setProg] = useState(Array.from({ length: totalBars }, emptyBar));
+  const [repeats, setRepeats] = useState(Array.from({ length: totalBars }, () => ({ kind: "none", count: 2 })));
+
+  // Keep arrays in sync with bar count changes
+  useEffect(() => {
+    setProg(prev => {
+      if (prev.length === totalBars) return prev;
+      if (prev.length < totalBars) return [...prev, ...Array.from({ length: totalBars - prev.length }, emptyBar)];
+      return prev.slice(0, totalBars);
+    });
+    setRepeats(prev => {
+      if (prev.length === totalBars) return prev;
+      if (prev.length < totalBars) return [...prev, ...Array.from({ length: totalBars - prev.length }, () => ({ kind: "none", count: 2 }))];
+      return prev.slice(0, totalBars);
+    });
+  }, [totalBars]);
+
+  // Menus (one at a time)
+  const [menu, setMenu] = useState(null); // { kind, barIndex, slotIndex?, x, y }
+
+  function openRoman(barIndex, slotIndex, e) {
+    e.stopPropagation();
+    setMenu({ kind: "roman", barIndex, slotIndex, x: e.clientX, y: e.clientY });
+  }
+  function openExt(barIndex, slotIndex, e) {
+    e.preventDefault();
+    e.stopPropagation();
+    // Only open if a chord exists in that slot
+    if (!prog[barIndex] || !prog[barIndex][slotIndex]) return;
+    setMenu({ kind: "ext", barIndex, slotIndex, x: e.clientX, y: e.clientY });
+  }
+  function openRepeat(barIndex, e) {
+    e.preventDefault();
+    e.stopPropagation();
+    setMenu({ kind: "repeat", barIndex, x: e.clientX, y: e.clientY });
+  }
+
+  function chooseRoman(val) {
+    if (!menu || menu.kind !== "roman") return;
+    const { barIndex, slotIndex } = menu;
+    setProg(prev => prev.map((bar, bi) => {
+      if (bi !== barIndex) return bar;
+      return bar.map((slot, si) => {
+        if (si !== slotIndex) return slot;
+        const ext = slot && slot.ext ? slot.ext : "";
+        return { roman: val, ext };
+        });
+    }));
+    setMenu(null);
+  }
+  function chooseExt(val) {
+    if (!menu || menu.kind !== "ext") return;
+    const { barIndex, slotIndex } = menu;
+    setProg(prev => prev.map((bar, bi) => {
+      if (bi !== barIndex) return bar;
+      return bar.map((slot, si) => (si === slotIndex && slot ? { ...slot, ext: val } : slot));
+    }));
+    setMenu(null);
+  }
+  function chooseRepeat(kind, count) {
+    if (!menu || menu.kind !== "repeat") return;
+    const { barIndex } = menu;
+    const c = count || 2;
+    setRepeats(prev => prev.map((r, i) => (i === barIndex ? { kind, count: c } : r)));
+    setMenu(null);
+  }
+
+  function clearSlot(barIndex, slotIndex) {
+    setProg(prev => prev.map((bar, bi) => (bi !== barIndex ? bar : bar.map((slot, si) => (si === slotIndex ? null : slot)))));
+  }
+
+  // Section controls
+  function setBars(sectionId, n) {
+    const val = Math.max(1, Math.min(128, Math.floor(Number(n) || 1)));
+    setSections(prev => prev.map(s => (s.id === sectionId ? { ...s, bars: val } : s)));
+  }
+  function multiplyBars(sectionId) {
+    setSections(prev => prev.map(s => (s.id === sectionId ? { ...s, bars: Math.min(128, s.bars * 2) } : s)));
+  }
+  function addSection() {
+    const id = Math.random().toString(36).slice(2, 7);
+    setSections(prev => [...prev, { id, name: "New Section", bars: 4 }]);
+  }
+
+  // Helpers
+  function chunk(arr, size) {
+    const out = [];
+    for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
+    return out;
+  }
+
+  // Close popovers on background click
+  function onBackgroundClick(e) {
+    const t = e.target;
+    if (t.closest && (t.closest("[data-popover]") || t.closest("[data-slot]") || t.closest("[data-bar]") || t.closest("[data-chip]") || t.closest("[data-controls]"))) return;
+    setMenu(null);
+  }
+
+  return (
+    <div onClick={onBackgroundClick} className="min-h-screen bg-zinc-950 text-zinc-100 font-sans">
+      {/* Header */}
+      <div className="sticky top-0 z-10 border-b border-zinc-900/60 bg-zinc-950/85 backdrop-blur">
+        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center">
+          <input
+            className="text-2xl md:text-3xl font-semibold bg-transparent border-b border-transparent focus:border-zinc-700 focus:outline-none"
+            value={title}
+            onChange={e => setTitle(e.target.value)}
+          />
+        </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 py-6 grid grid-cols-12 gap-6">
+        {/* LEFT: Sections */}
+        <aside className="col-span-12 md:col-span-3">
+          <div className="sticky top-16 space-y-3">
+            <div className="text-sm uppercase tracking-wide opacity-60">Sections</div>
+            {sections.map(s => (
+              <div key={s.id} className="flex items-center justify-between rounded-xl border border-zinc-800/70 bg-zinc-900/40 px-3 py-2" data-controls>
+                <select
+                  className="bg-transparent text-sm"
+                  value={s.name}
+                  onChange={e => setSections(prev => prev.map(x => (x.id === s.id ? { ...x, name: e.target.value } : x)))}
+                >
+                  { ["Intro","Verse","Pre‑Chorus","Chorus","Bridge","Solo","Outro"].map(n => (
+                    <option key={n} value={n}>{n}</option>
+                  )) }
+                </select>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="number"
+                    min={1}
+                    max={128}
+                    value={s.bars}
+                    onChange={e => setBars(s.id, e.target.value)}
+                    className="w-16 bg-transparent border border-zinc-700/70 rounded px-2 py-1 text-sm"
+                  />
+                  <button
+                    onClick={() => multiplyBars(s.id)}
+                    className="w-7 h-7 rounded-full border border-zinc-700/70 bg-zinc-900 hover:bg-zinc-800"
+                    title="Double bars"
+                  >✚</button>
+                </div>
+              </div>
+            ))}
+            <button onClick={addSection} className="w-full rounded-xl border border-dashed border-zinc-800 px-3 py-2 text-sm hover:bg-zinc-900/60" data-controls>
+              + Add Section
+            </button>
+          </div>
+        </aside>
+
+        {/* RIGHT: 4 bars per row */}
+        <main className="col-span-12 md:col-span-9">
+          <div className="space-y-5">
+            {sectionOffsets.map(sec => {
+              const barIndexes = Array.from({ length: sec.bars }, (_, i) => sec.start + i);
+              const rows = chunk(barIndexes, 4);
+              return (
+                <React.Fragment key={sec.id}>
+                  <div className="flex items-center gap-3 mt-1">
+                    <div className="text-sm font-semibold tracking-wide">{sec.name}</div>
+                    <div className="flex-1 h-px bg-zinc-800/60" />
+                    <div className="text-xs opacity-60">{sec.bars} bars</div>
+                  </div>
+
+                  {rows.map((row, rIdx) => (
+                    <div key={rIdx} className="grid grid-cols-4 gap-3">
+                      {row.map(barIndex => {
+                        const bar = prog[barIndex] || emptyBar();
+                        const rep = repeats[barIndex] || { kind: "none", count: 2 };
+                        return (
+                          <div
+                            key={barIndex}
+                            data-bar
+                            onContextMenu={e => openRepeat(barIndex, e)}
+                            className="relative rounded-xl bg-zinc-900/30 ring-1 ring-inset ring-zinc-800/60"
+                          >
+                            {/* Repeat markers */}
+                            {rep.kind !== "none" && (
+                              <div className="absolute inset-y-1 left-1 right-1 pointer-events-none flex items-center justify-between text-[10px] uppercase tracking-wide text-zinc-400">
+                                {rep.kind === "start" ? <span>||:</span> : <span />}
+                                {rep.kind === "end" ? <span>:|| ×{rep.count}</span> : <span />}
+                              </div>
+                            )}
+                            {/* Beat grid */}
+                            <div className="relative h-14">
+                              <div className="absolute inset-x-2 top-1/2 -translate-y-1/2 h-px bg-zinc-800/60" />
+                              <div className="absolute inset-0 grid grid-cols-4">
+                                {[0,1,2,3].map(slot => (
+                                  <div key={slot} className="relative border-l border-zinc-800/40 first:border-l-0">
+                                    {/* Interactive layer */}
+                                    <button
+                                      data-slot
+                                      onClick={e => openRoman(barIndex, slot, e)}
+                                      onContextMenu={e => openExt(barIndex, slot, e)}
+                                      className="absolute inset-0"
+                                      title="Click to add/change • Right‑click extension"
+                                    />
+                                    {/* Symbol */}
+                                    {bar[slot] && (
+                                      <span
+                                        data-chip
+                                        className="group absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 select-none cursor-pointer"
+                                        onClick={e => openRoman(barIndex, slot, e)}
+                                        onContextMenu={e => openExt(barIndex, slot, e)}
+                                      >
+                                        <span className="text-lg md:text-xl font-semibold tracking-tight">
+                                          {bar[slot].roman}
+                                          {bar[slot].ext ? (
+                                            <sup className="ml-1 text-xs font-normal align-super opacity-85">{bar[slot].ext}</sup>
+                                          ) : null}
+                                        </span>
+                                        <button
+                                          onClick={e => { e.stopPropagation(); clearSlot(barIndex, slot); }}
+                                          className="ml-2 text-xs opacity-0 group-hover:opacity-70 hover:opacity-100 transition-opacity"
+                                          title="Clear"
+                                        >×</button>
+                                      </span>
+                                    )}
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ))}
+                </React.Fragment>
+              );
+            })}
+          </div>
+        </main>
+      </div>
+
+      {/* Popovers */}
+      {menu && menu.kind === "roman" && (
+        <div data-popover className="fixed z-50" style={{ left: menu.x, top: menu.y }}>
+          <div className="min-w-[160px] rounded-xl border border-zinc-700 bg-zinc-900 shadow-xl p-1">
+            {ROMANS.map(r => (
+              <button
+                key={r}
+                onClick={() => chooseRoman(r)}
+                className="w-full text-left px-3 py-2 rounded-lg hover:bg-zinc-800 font-semibold"
+              >{r}</button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {menu && menu.kind === "ext" && (
+        <div data-popover className="fixed z-50" style={{ left: menu.x, top: menu.y }}>
+          <div className="min-w-[180px] rounded-xl border border-zinc-700 bg-zinc-900 shadow-xl p-1">
+            {EXTENSIONS.map(x => (
+              <button
+                key={x || "none"}
+                onClick={() => chooseExt(x)}
+                className="w-full text-left px-3 py-2 rounded-lg hover:bg-zinc-800 font-semibold"
+              >{x || "—"}</button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {menu && menu.kind === "repeat" && (
+        <div data-popover className="fixed z-50" style={{ left: menu.x, top: menu.y }}>
+          <div className="min-w-[200px] rounded-xl border border-zinc-700 bg-zinc-900 shadow-xl p-2">
+            <div className="px-3 py-1 text-xs uppercase opacity-70">Repeat</div>
+            <button className="w-full text-left px-3 py-2 rounded-lg hover:bg-zinc-800" onClick={() => chooseRepeat("none")}>None</button>
+            <button className="w-full text-left px-3 py-2 rounded-lg hover:bg-zinc-800" onClick={() => chooseRepeat("start")}>||:</button>
+            <div className="px-3 pt-2 text-xs uppercase opacity-70">End :|| ×</div>
+            <div className="flex gap-1 px-3 pb-2">
+              {[2,3,4].map(n => (
+                <button key={n} className="flex-1 px-2 py-2 rounded-lg border border-zinc-700 hover:bg-zinc-800" onClick={() => chooseRepeat("end", n)}>
+                  :|| ×{n}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
   );
-  transition: all 0.2s ease;
 }
 
-.custom-color-wrapper:hover {
-  transform: scale(1.1);
-  border-color: rgba(255, 255, 255, 0.4);
 }
 
-.custom-color-input {
+/* SVG progress indicator styling */
+.progress-indicator {
   position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
-  opacity: 0;
-  cursor: pointer;
-}
-
-.custom-icon {
+  transform: rotate(-90deg); /* start progress at top (12 o'clock) */
   pointer-events: none;
-  color: white;
-  font-size: 20px;
-  font-weight: bold;
-  text-shadow: 0 0 4px black, 0 0 8px black;
+  overflow: visible;         /* ensure the entire circle is displayed */
 }
 
+/* Styling for the progress bar (the green circle) */
+.progress-bar {
+  stroke: #30db80;
+  stroke-width: 7px;
+  fill: none;
+  transition: stroke-dashoffset 0.3s ease;
+}
+
+/* Center the play/pause icon over the progress indicator */
+.play-circle-container .play-icon {
+  position: absolute;
+  z-index: 2;
+  width: 40px;  /* desired icon size */
+  height: auto;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
