@@ -21,6 +21,9 @@ body {
   align-items: center;
   height: 100vh;
   font-family: 'iAWriterMonoS', monospace;
+  color: #ffffff;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  overflow: hidden;
 }
 
 /* 3. Main Metronome Container */
@@ -58,6 +61,16 @@ body {
   width: 35px;
   height: auto;
   cursor: pointer;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+  display: block;
+}
+
+.control-icon:hover {
+  transform: scale(1.1);
+}
+
+.control-icon:active {
+  transform: scale(0.95);
 }
 
 /* 7. Play Button */
@@ -103,7 +116,13 @@ body {
   top: calc(50% - 90px);
   left: calc(50% - 118px);
   height: 30px;
+  width: auto;
   cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.speed-icon:hover {
+  transform: scale(1.1);
 }
 
 /* Speed Mode Popup */
@@ -231,329 +250,9 @@ button#saveRandomMode:hover {
 /* Container for play icon with progress indicator */
 .play-circle-container {
   position: relative;
-  width: 60px;          /* default size; may be updated via JS */
+  width: 60px;
   height: 60px;
-  overflow: visible;    /* allow the stroke to render outside the container */import React, { useEffect, useMemo, useState } from "react";
-
-// ===== LEAD‑SHEET CHORD PAD (Musician‑first, minimal, error‑free) =====
-// • Left rail: section name + free bar count (1–128) + ✚ (double bars)
-// • Right: 4 bars per row, compact. Each bar has 4 beat slots (click = Roman menu)
-// • Left‑click beat: choose Roman (I, ii, iii, IV, V, vi, viiø)
-// • Right‑click beat or chord: extensions menu (superscript)
-// • Right‑click bar background: repeat menu (None, ||:, :|| ×2/×3/×4)
-// • Hover a chord to reveal × to clear that slot
-
-const ROMANS = ["I", "ii", "iii", "IV", "V", "vi", "viiø"];
-const EXTENSIONS = ["", "7", "maj7", "m7", "6", "9", "11", "13", "sus2", "sus4", "add9", "dim", "ø7"];
-
-export default function App() {
-  // Sections state
-  const [sections, setSections] = useState([
-    { id: "s1", name: "Intro", bars: 4 },
-    { id: "s2", name: "Verse", bars: 8 },
-    { id: "s3", name: "Chorus", bars: 8 },
-  ]);
-  const [title, setTitle] = useState("Untitled Chart");
-
-  // Compute offsets and totals
-  const sectionOffsets = useMemo(() => {
-    const out = [];
-    let acc = 0;
-    for (const s of sections) {
-      out.push({ id: s.id, name: s.name, start: acc, bars: s.bars });
-      acc += s.bars;
-    }
-    return out;
-  }, [sections]);
-  const totalBars = useMemo(() => sectionOffsets.reduce((n, s) => n + s.bars, 0), [sectionOffsets]);
-
-  // Progression (bars × 4 slots) and Repeat markers per bar
-  const SLOTS_PER_BAR = 4;
-  const emptyBar = () => Array.from({ length: SLOTS_PER_BAR }, () => null);
-  const [prog, setProg] = useState(Array.from({ length: totalBars }, emptyBar));
-  const [repeats, setRepeats] = useState(Array.from({ length: totalBars }, () => ({ kind: "none", count: 2 })));
-
-  // Keep arrays in sync with bar count changes
-  useEffect(() => {
-    setProg(prev => {
-      if (prev.length === totalBars) return prev;
-      if (prev.length < totalBars) return [...prev, ...Array.from({ length: totalBars - prev.length }, emptyBar)];
-      return prev.slice(0, totalBars);
-    });
-    setRepeats(prev => {
-      if (prev.length === totalBars) return prev;
-      if (prev.length < totalBars) return [...prev, ...Array.from({ length: totalBars - prev.length }, () => ({ kind: "none", count: 2 }))];
-      return prev.slice(0, totalBars);
-    });
-  }, [totalBars]);
-
-  // Menus (one at a time)
-  const [menu, setMenu] = useState(null); // { kind, barIndex, slotIndex?, x, y }
-
-  function openRoman(barIndex, slotIndex, e) {
-    e.stopPropagation();
-    setMenu({ kind: "roman", barIndex, slotIndex, x: e.clientX, y: e.clientY });
-  }
-  function openExt(barIndex, slotIndex, e) {
-    e.preventDefault();
-    e.stopPropagation();
-    // Only open if a chord exists in that slot
-    if (!prog[barIndex] || !prog[barIndex][slotIndex]) return;
-    setMenu({ kind: "ext", barIndex, slotIndex, x: e.clientX, y: e.clientY });
-  }
-  function openRepeat(barIndex, e) {
-    e.preventDefault();
-    e.stopPropagation();
-    setMenu({ kind: "repeat", barIndex, x: e.clientX, y: e.clientY });
-  }
-
-  function chooseRoman(val) {
-    if (!menu || menu.kind !== "roman") return;
-    const { barIndex, slotIndex } = menu;
-    setProg(prev => prev.map((bar, bi) => {
-      if (bi !== barIndex) return bar;
-      return bar.map((slot, si) => {
-        if (si !== slotIndex) return slot;
-        const ext = slot && slot.ext ? slot.ext : "";
-        return { roman: val, ext };
-        });
-    }));
-    setMenu(null);
-  }
-  function chooseExt(val) {
-    if (!menu || menu.kind !== "ext") return;
-    const { barIndex, slotIndex } = menu;
-    setProg(prev => prev.map((bar, bi) => {
-      if (bi !== barIndex) return bar;
-      return bar.map((slot, si) => (si === slotIndex && slot ? { ...slot, ext: val } : slot));
-    }));
-    setMenu(null);
-  }
-  function chooseRepeat(kind, count) {
-    if (!menu || menu.kind !== "repeat") return;
-    const { barIndex } = menu;
-    const c = count || 2;
-    setRepeats(prev => prev.map((r, i) => (i === barIndex ? { kind, count: c } : r)));
-    setMenu(null);
-  }
-
-  function clearSlot(barIndex, slotIndex) {
-    setProg(prev => prev.map((bar, bi) => (bi !== barIndex ? bar : bar.map((slot, si) => (si === slotIndex ? null : slot)))));
-  }
-
-  // Section controls
-  function setBars(sectionId, n) {
-    const val = Math.max(1, Math.min(128, Math.floor(Number(n) || 1)));
-    setSections(prev => prev.map(s => (s.id === sectionId ? { ...s, bars: val } : s)));
-  }
-  function multiplyBars(sectionId) {
-    setSections(prev => prev.map(s => (s.id === sectionId ? { ...s, bars: Math.min(128, s.bars * 2) } : s)));
-  }
-  function addSection() {
-    const id = Math.random().toString(36).slice(2, 7);
-    setSections(prev => [...prev, { id, name: "New Section", bars: 4 }]);
-  }
-
-  // Helpers
-  function chunk(arr, size) {
-    const out = [];
-    for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
-    return out;
-  }
-
-  // Close popovers on background click
-  function onBackgroundClick(e) {
-    const t = e.target;
-    if (t.closest && (t.closest("[data-popover]") || t.closest("[data-slot]") || t.closest("[data-bar]") || t.closest("[data-chip]") || t.closest("[data-controls]"))) return;
-    setMenu(null);
-  }
-
-  return (
-    <div onClick={onBackgroundClick} className="min-h-screen bg-zinc-950 text-zinc-100 font-sans">
-      {/* Header */}
-      <div className="sticky top-0 z-10 border-b border-zinc-900/60 bg-zinc-950/85 backdrop-blur">
-        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center">
-          <input
-            className="text-2xl md:text-3xl font-semibold bg-transparent border-b border-transparent focus:border-zinc-700 focus:outline-none"
-            value={title}
-            onChange={e => setTitle(e.target.value)}
-          />
-        </div>
-      </div>
-
-      <div className="max-w-7xl mx-auto px-4 py-6 grid grid-cols-12 gap-6">
-        {/* LEFT: Sections */}
-        <aside className="col-span-12 md:col-span-3">
-          <div className="sticky top-16 space-y-3">
-            <div className="text-sm uppercase tracking-wide opacity-60">Sections</div>
-            {sections.map(s => (
-              <div key={s.id} className="flex items-center justify-between rounded-xl border border-zinc-800/70 bg-zinc-900/40 px-3 py-2" data-controls>
-                <select
-                  className="bg-transparent text-sm"
-                  value={s.name}
-                  onChange={e => setSections(prev => prev.map(x => (x.id === s.id ? { ...x, name: e.target.value } : x)))}
-                >
-                  { ["Intro","Verse","Pre‑Chorus","Chorus","Bridge","Solo","Outro"].map(n => (
-                    <option key={n} value={n}>{n}</option>
-                  )) }
-                </select>
-                <div className="flex items-center gap-2">
-                  <input
-                    type="number"
-                    min={1}
-                    max={128}
-                    value={s.bars}
-                    onChange={e => setBars(s.id, e.target.value)}
-                    className="w-16 bg-transparent border border-zinc-700/70 rounded px-2 py-1 text-sm"
-                  />
-                  <button
-                    onClick={() => multiplyBars(s.id)}
-                    className="w-7 h-7 rounded-full border border-zinc-700/70 bg-zinc-900 hover:bg-zinc-800"
-                    title="Double bars"
-                  >✚</button>
-                </div>
-              </div>
-            ))}
-            <button onClick={addSection} className="w-full rounded-xl border border-dashed border-zinc-800 px-3 py-2 text-sm hover:bg-zinc-900/60" data-controls>
-              + Add Section
-            </button>
-          </div>
-        </aside>
-
-        {/* RIGHT: 4 bars per row */}
-        <main className="col-span-12 md:col-span-9">
-          <div className="space-y-5">
-            {sectionOffsets.map(sec => {
-              const barIndexes = Array.from({ length: sec.bars }, (_, i) => sec.start + i);
-              const rows = chunk(barIndexes, 4);
-              return (
-                <React.Fragment key={sec.id}>
-                  <div className="flex items-center gap-3 mt-1">
-                    <div className="text-sm font-semibold tracking-wide">{sec.name}</div>
-                    <div className="flex-1 h-px bg-zinc-800/60" />
-                    <div className="text-xs opacity-60">{sec.bars} bars</div>
-                  </div>
-
-                  {rows.map((row, rIdx) => (
-                    <div key={rIdx} className="grid grid-cols-4 gap-3">
-                      {row.map(barIndex => {
-                        const bar = prog[barIndex] || emptyBar();
-                        const rep = repeats[barIndex] || { kind: "none", count: 2 };
-                        return (
-                          <div
-                            key={barIndex}
-                            data-bar
-                            onContextMenu={e => openRepeat(barIndex, e)}
-                            className="relative rounded-xl bg-zinc-900/30 ring-1 ring-inset ring-zinc-800/60"
-                          >
-                            {/* Repeat markers */}
-                            {rep.kind !== "none" && (
-                              <div className="absolute inset-y-1 left-1 right-1 pointer-events-none flex items-center justify-between text-[10px] uppercase tracking-wide text-zinc-400">
-                                {rep.kind === "start" ? <span>||:</span> : <span />}
-                                {rep.kind === "end" ? <span>:|| ×{rep.count}</span> : <span />}
-                              </div>
-                            )}
-                            {/* Beat grid */}
-                            <div className="relative h-14">
-                              <div className="absolute inset-x-2 top-1/2 -translate-y-1/2 h-px bg-zinc-800/60" />
-                              <div className="absolute inset-0 grid grid-cols-4">
-                                {[0,1,2,3].map(slot => (
-                                  <div key={slot} className="relative border-l border-zinc-800/40 first:border-l-0">
-                                    {/* Interactive layer */}
-                                    <button
-                                      data-slot
-                                      onClick={e => openRoman(barIndex, slot, e)}
-                                      onContextMenu={e => openExt(barIndex, slot, e)}
-                                      className="absolute inset-0"
-                                      title="Click to add/change • Right‑click extension"
-                                    />
-                                    {/* Symbol */}
-                                    {bar[slot] && (
-                                      <span
-                                        data-chip
-                                        className="group absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 select-none cursor-pointer"
-                                        onClick={e => openRoman(barIndex, slot, e)}
-                                        onContextMenu={e => openExt(barIndex, slot, e)}
-                                      >
-                                        <span className="text-lg md:text-xl font-semibold tracking-tight">
-                                          {bar[slot].roman}
-                                          {bar[slot].ext ? (
-                                            <sup className="ml-1 text-xs font-normal align-super opacity-85">{bar[slot].ext}</sup>
-                                          ) : null}
-                                        </span>
-                                        <button
-                                          onClick={e => { e.stopPropagation(); clearSlot(barIndex, slot); }}
-                                          className="ml-2 text-xs opacity-0 group-hover:opacity-70 hover:opacity-100 transition-opacity"
-                                          title="Clear"
-                                        >×</button>
-                                      </span>
-                                    )}
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  ))}
-                </React.Fragment>
-              );
-            })}
-          </div>
-        </main>
-      </div>
-
-      {/* Popovers */}
-      {menu && menu.kind === "roman" && (
-        <div data-popover className="fixed z-50" style={{ left: menu.x, top: menu.y }}>
-          <div className="min-w-[160px] rounded-xl border border-zinc-700 bg-zinc-900 shadow-xl p-1">
-            {ROMANS.map(r => (
-              <button
-                key={r}
-                onClick={() => chooseRoman(r)}
-                className="w-full text-left px-3 py-2 rounded-lg hover:bg-zinc-800 font-semibold"
-              >{r}</button>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {menu && menu.kind === "ext" && (
-        <div data-popover className="fixed z-50" style={{ left: menu.x, top: menu.y }}>
-          <div className="min-w-[180px] rounded-xl border border-zinc-700 bg-zinc-900 shadow-xl p-1">
-            {EXTENSIONS.map(x => (
-              <button
-                key={x || "none"}
-                onClick={() => chooseExt(x)}
-                className="w-full text-left px-3 py-2 rounded-lg hover:bg-zinc-800 font-semibold"
-              >{x || "—"}</button>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {menu && menu.kind === "repeat" && (
-        <div data-popover className="fixed z-50" style={{ left: menu.x, top: menu.y }}>
-          <div className="min-w-[200px] rounded-xl border border-zinc-700 bg-zinc-900 shadow-xl p-2">
-            <div className="px-3 py-1 text-xs uppercase opacity-70">Repeat</div>
-            <button className="w-full text-left px-3 py-2 rounded-lg hover:bg-zinc-800" onClick={() => chooseRepeat("none")}>None</button>
-            <button className="w-full text-left px-3 py-2 rounded-lg hover:bg-zinc-800" onClick={() => chooseRepeat("start")}>||:</button>
-            <div className="px-3 pt-2 text-xs uppercase opacity-70">End :|| ×</div>
-            <div className="flex gap-1 px-3 pb-2">
-              {[2,3,4].map(n => (
-                <button key={n} className="flex-1 px-2 py-2 rounded-lg border border-zinc-700 hover:bg-zinc-800" onClick={() => chooseRepeat("end", n)}>
-                  :|| ×{n}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
+  overflow: visible;
 }
 
 /* SVG progress indicator styling */
@@ -563,26 +262,22 @@ export default function App() {
   left: 0;
   width: 100%;
   height: 100%;
-  transform: rotate(-90deg); /* start progress at top (12 o'clock) */
+  transform: rotate(-90deg);
   pointer-events: none;
-  overflow: visible;         /* ensure the entire circle is displayed */
+  overflow: visible;
 }
 
-/* Styling for the progress bar (the green circle) */
+/* Styling for the progress bar */
 .progress-bar {
-  stroke: #30db80;
-  stroke-width: 7px;
+  stroke: #29be6f;
+  stroke-width: 5px;
   fill: none;
   transition: stroke-dashoffset 0.3s ease;
 }
 
-/* Center the play/pause icon over the progress indicator */
-.play-circle-container .play-icon {
-  position: absolute;
-  z-index: 2;
-  width: 40px;  /* desired icon size */
-  height: auto;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+.progress-bg {
+  stroke: #ccc;
+  stroke-width: 5px;
+  fill: none;
+  opacity: 0.2;
 }
