@@ -130,17 +130,17 @@ body {
   position: absolute;
   top: 20px;
   right: 20px;
-  height: 28px;
+  height: 32px;
   width: auto;
   cursor: pointer;
-  opacity: 0.8;
-  transition: transform 0.2s ease, opacity 0.2s ease;
+  transition: transform 0.2s ease;
   z-index: 10;
+  filter: brightness(1.2);
 }
 
 .settings-icon:hover {
-  opacity: 1;
   transform: rotate(90deg) scale(1.15);
+  filter: brightness(1.5);
 }
 
 /* Speed Mode Popup */
