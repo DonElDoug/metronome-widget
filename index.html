@@ -4,38 +4,57 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Metronome Widget</title>
-  <link rel="stylesheet" href="style.css"/>
+  <link rel="stylesheet" href="style.css?v=9"/>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
   <!-- Load Speed Mode and Random Mode first -->
-  <script defer src="speed_mode.js"></script>
-  <script defer src="random_mode.js"></script>
-  <script defer src="script.js"></script>
+  <script defer src="speed_mode.js?v=7"></script>
+  <script defer src="random_mode.js?v=7"></script>
+  <script defer src="script.js?v=11"></script>
 </head>
 <body>
   <!-- Metronome Container -->
   <div class="bpm_container">
-    <!-- Speed Icon -->
-    <img src="icons/speed_off.png" id="speedIcon" class="speed-icon" alt="Mode Toggle" data-mode="speed" data-state="off" />
-    <!-- Timer Display -->
-    <div class="timer-display">00:00;00</div>
-    <img src="icons/refresh_icon.png" class="reset-icon" style="display: none;" />
-
-    <!-- BPM Controls -->
-    <div class="bpm-wrapper">
-      <img src="icons/minus_icon.png" alt="Decrease BPM" id="minusBtn" class="control-icon" />
-      <div id="bpmDisplay" class="bpm-display">100</div>
-      <img src="icons/plus_icon.png" alt="Increase BPM" id="plusBtn" class="control-icon" />
+    
+    <!-- Top Bar Icons -->
+    <div class="top-bar">
+      <div id="speedIcon" class="icon-button" data-mode="speed" data-state="off">
+        <i data-lucide="zap"></i>
+      </div>
+      <div class="timer-display">00:00;00</div>
+      <div id="settingsIcon" class="icon-button">
+        <i data-lucide="settings"></i>
+      </div>
     </div>
 
-    <!-- Play/Pause Button with Circular Indicator -->
-    <div class="play-button-container">
-      <div class="play-circle-container">
-        <svg class="progress-indicator" viewBox="0 0 100 100">
-          <circle class="progress-bg" cx="50" cy="50" r="45" fill="none" stroke="#ccc" stroke-width="5"></circle>
-          <circle class="progress-bar" cx="50" cy="50" r="45" fill="none" stroke="#29be6f" stroke-width="5"
-            stroke-dasharray="282.743" stroke-dashoffset="282.743"></circle>
-        </svg>
-        <img src="icons/play_icon.png" alt="Play" id="playPauseBtn" class="play-icon" />
+    <!-- Main Content -->
+    <div class="main-content">
+      <!-- BPM Controls -->
+      <div class="bpm-section">
+        <button id="minusBtn" class="bpm-control" aria-label="Decrease BPM">
+          <i data-lucide="minus"></i>
+        </button>
+        <div id="bpmDisplay" class="bpm-display">100</div>
+        <button id="plusBtn" class="bpm-control" aria-label="Increase BPM">
+          <i data-lucide="plus"></i>
+        </button>
       </div>
+
+      <!-- Play Button -->
+      <div class="play-container">
+        <svg class="progress-ring" viewBox="0 0 120 120">
+          <circle class="progress-ring-bg" cx="60" cy="60" r="54" />
+          <circle class="progress-ring-bar" cx="60" cy="60" r="54" />
+        </svg>
+        <button id="playPauseBtn" class="play-button" aria-label="Play/Pause">
+          <i data-lucide="play"></i>
+        </button>
+      </div>
+
+      <!-- Reset Icon (hidden by default) -->
+      <button id="resetIcon" class="reset-button" style="display: none;" aria-label="Reset timer">
+        <i data-lucide="rotate-ccw"></i>
+      </button>
     </div>
   </div>
 
@@ -79,6 +98,53 @@
         <input type="number" id="randomBars" value="10" />
       </div>
       <button id="saveRandomMode">Save</button>
+    </div>
+  </div>
+
+  <!-- Settings Popup -->
+  <div id="settingsPopup" class="speed-mode-popup" style="display: none;">
+    <div class="popup-content">
+      <span id="closeSettingsPopup" class="close-popup">&times;</span>
+      <h2>Settings</h2>
+      
+      <!-- Background Color Section -->
+      <div class="color-section">
+        <div class="color-section-title">Background Color</div>
+        <div class="color-picker-container" id="bgSwatches">
+          <div class="color-swatch" style="background-color: #262626;" data-color="#262626" data-type="bg"></div>
+          <div class="color-swatch" style="background-color: #1a1a2e;" data-color="#1a1a2e" data-type="bg"></div>
+          <div class="color-swatch" style="background-color: #1e3a2a;" data-color="#1e3a2a" data-type="bg"></div>
+          <div class="color-swatch" style="background-color: #2d1b2e;" data-color="#2d1b2e" data-type="bg"></div>
+          <div class="color-swatch" style="background-color: #000000;" data-color="#000000" data-type="bg"></div>
+          <div class="color-swatch" style="background-color: #ffffff;" data-color="#ffffff" data-type="bg"></div>
+          
+          <!-- Custom Color Input -->
+          <div class="custom-color-wrapper" title="Custom Color">
+            <span class="custom-icon">+</span>
+            <input type="color" id="customBgInput" class="custom-color-input" value="#262626">
+          </div>
+        </div>
+      </div>
+
+      <!-- Text Color Section -->
+      <div class="color-section">
+        <div class="color-section-title">Text Color</div>
+        <div class="color-picker-container" id="textSwatches">
+          <div class="color-swatch" style="background-color: #ffffff;" data-color="#ffffff" data-type="text"></div>
+          <div class="color-swatch" style="background-color: #e0e0e0;" data-color="#e0e0e0" data-type="text"></div>
+          <div class="color-swatch" style="background-color: #a0a0a0;" data-color="#a0a0a0" data-type="text"></div>
+          <div class="color-swatch" style="background-color: #29be6f;" data-color="#29be6f" data-type="text"></div>
+          <div class="color-swatch" style="background-color: #ff6b6b;" data-color="#ff6b6b" data-type="text"></div>
+          <div class="color-swatch" style="background-color: #000000;" data-color="#000000" data-type="text"></div>
+
+          <!-- Custom Color Input -->
+          <div class="custom-color-wrapper" title="Custom Color">
+            <span class="custom-icon">+</span>
+            <input type="color" id="customTextInput" class="custom-color-input" value="#ffffff">
+          </div>
+        </div>
+      </div>
+
     </div>
   </div>
 </body>

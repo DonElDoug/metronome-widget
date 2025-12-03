@@ -1,213 +1,256 @@
-// ---------- Speed Mode Variables ----------
-let speedModeEnabled = false;
-let initialBpm = 100;
-let finalBpm = 120;
-let speedIncrement = 5;
-let barsPerIncrement = 4;
-let clickCount = 0;
+// ----------------------------------------------------
+// Speed Mode Strategy
+// ----------------------------------------------------
 
-const speedModePopup = document.getElementById('speedModePopup');
-const closePopup = document.getElementById('closePopup');
-const saveSpeedMode = document.getElementById('saveSpeedMode');
-const initialBpmInput = document.getElementById('initialBpm');
-const finalBpmInput = document.getElementById('finalBpm');
-const incrementInput = document.getElementById('increment');
-const barsInput = document.getElementById('bars');
-const estimatedTimeDisplay = document.getElementById('estimatedTime');
+class SpeedModeStrategy {
+    constructor() {
+        this.initialBpm = 100;
+        this.finalBpm = 120;
+        this.speedIncrement = 5;
+        this.barsPerIncrement = 4;
+        this.clickCount = 0;
+        
+        this.ui = {}; // Initialize empty
+        
+        this.circumference = 0;
+        this.debounceTimer = null;
+    }
 
-const progressBar = document.querySelector('.progress-bar');
-let circumference = 0;  // this will be dynamically updated
+    init() {
+        this.ui = {
+            popup: document.getElementById('speedModePopup'),
+            closeBtn: document.getElementById('closePopup'),
+            saveBtn: document.getElementById('saveSpeedMode'),
+            initialBpmInput: document.getElementById('initialBpm'),
+            finalBpmInput: document.getElementById('finalBpm'),
+            incrementInput: document.getElementById('increment'),
+            barsInput: document.getElementById('bars'),
+            estimatedTimeDisplay: document.getElementById('estimatedTime'),
+            progressBar: document.querySelector('.progress-bar')
+        };
 
-let debounceTimer;
+        this.bindEvents();
+        this.loadSettings();
+        this.adjustProgressIndicatorSizing();
+    }
 
-// ---------- Speed Mode Functions ----------
+    bindEvents() {
+        if (this.ui.closeBtn) {
+            this.ui.closeBtn.addEventListener('click', () => {
+                this.ui.popup.style.display = 'none';
+            });
+        }
 
-function loadSpeedModeSettings() {
-    initialBpm = parseInt(localStorage.getItem('initialBpm')) || 100;
-    finalBpm = parseInt(localStorage.getItem('finalBpm')) || 180;
-    speedIncrement = parseInt(localStorage.getItem('increment')) || 5;
-    barsPerIncrement = parseInt(localStorage.getItem('bars')) || 16;
+        if (this.ui.saveBtn) {
+            this.ui.saveBtn.addEventListener('click', () => {
+                this.saveSettings();
+                // Enable Speed Mode
+                if (window.metronomeApp) {
+                    window.metronomeApp.setBpm(this.initialBpm);
+                    window.metronomeApp.setStrategy('SPEED');
+                    this.ui.popup.style.display = 'none';
+                }
+            });
+        }
 
-    initialBpmInput.value = initialBpm;
-    finalBpmInput.value = finalBpm;
-    incrementInput.value = speedIncrement;
-    barsInput.value = barsPerIncrement;
-}
+        const update = () => this.updateEstimatedTimeDisplayDebounced();
+        if (this.ui.initialBpmInput) this.ui.initialBpmInput.addEventListener('input', update);
+        if (this.ui.finalBpmInput) this.ui.finalBpmInput.addEventListener('input', update);
+        if (this.ui.incrementInput) this.ui.incrementInput.addEventListener('input', update);
+        if (this.ui.barsInput) this.ui.barsInput.addEventListener('input', update);
+    }
 
-function saveSpeedModeSettings() {
-    initialBpm = parseInt(initialBpmInput.value);
-    finalBpm = parseInt(finalBpmInput.value);
-    speedIncrement = parseInt(incrementInput.value);
-    barsPerIncrement = parseInt(barsInput.value);
+    loadSettings() {
+        this.initialBpm = parseInt(localStorage.getItem('initialBpm')) || 100;
+        this.finalBpm = parseInt(localStorage.getItem('finalBpm')) || 180;
+        this.speedIncrement = parseInt(localStorage.getItem('increment')) || 5;
+        this.barsPerIncrement = parseInt(localStorage.getItem('bars')) || 16;
 
-    localStorage.setItem('initialBpm', initialBpm);
-    localStorage.setItem('finalBpm', finalBpm);
-    localStorage.setItem('increment', speedIncrement);
-    localStorage.setItem('bars', barsPerIncrement);
-}
+        if (this.ui.initialBpmInput) this.ui.initialBpmInput.value = this.initialBpm;
+        if (this.ui.finalBpmInput) this.ui.finalBpmInput.value = this.finalBpm;
+        if (this.ui.incrementInput) this.ui.incrementInput.value = this.speedIncrement;
+        if (this.ui.barsInput) this.ui.barsInput.value = this.barsPerIncrement;
+    }
 
-function calculateEstimatedTime(initial, fin, increment, bars, clicks = 4) {
-    // If initial is at or above target, simulate a single lap.
-    if (initial >= fin) return (bars * clicks * 60) / initial;
+    saveSettings() {
+        const initial = parseInt(this.ui.initialBpmInput.value);
+        const final = parseInt(this.ui.finalBpmInput.value);
+        const increment = parseInt(this.ui.incrementInput.value);
+        const bars = parseInt(this.ui.barsInput.value);
 
-    let totalSeconds = 0;
-    let currentBpm = initial;
-    // Add segments for each lap until reaching the final BPM
-    while (currentBpm < fin) {
-        totalSeconds += (bars * clicks * 60) / currentBpm;
-        let newBpm = currentBpm + increment;
-        if (newBpm >= fin) {
-            // The next lap will be at final BPM
-            currentBpm = fin;
-        } else {
-            currentBpm = newBpm;
+        // Validation
+        if (isNaN(initial) || initial < 20 || initial > 300) {
+            alert('Initial BPM must be between 20 and 300');
+            return;
+        }
+        if (isNaN(final) || final < 20 || final > 300) {
+            alert('Final BPM must be between 20 and 300');
+            return;
+        }
+        if (initial >= final) {
+            alert('Initial BPM must be less than Final BPM');
+            return;
+        }
+        if (isNaN(increment) || increment < 1 || increment > 50) {
+            alert('Increment must be between 1 and 50');
+            return;
+        }
+        if (isNaN(bars) || bars < 1 || bars > 100) {
+            alert('Bars must be between 1 and 100');
+            return;
+        }
+
+        this.initialBpm = initial;
+        this.finalBpm = final;
+        this.speedIncrement = increment;
+        this.barsPerIncrement = bars;
+
+        localStorage.setItem('initialBpm', this.initialBpm);
+        localStorage.setItem('finalBpm', this.finalBpm);
+        localStorage.setItem('increment', this.speedIncrement);
+        localStorage.setItem('bars', this.barsPerIncrement);
+    }
+
+    calculateEstimatedTime(initial, fin, increment, bars, clicks = 4) {
+        if (initial >= fin) return (bars * clicks * 60) / initial;
+        let totalSeconds = 0;
+        let currentBpm = initial;
+        while (currentBpm < fin) {
+            totalSeconds += (bars * clicks * 60) / currentBpm;
+            let newBpm = currentBpm + increment;
+            if (newBpm >= fin) currentBpm = fin;
+            else currentBpm = newBpm;
+        }
+        totalSeconds += (bars * clicks * 60) / fin;
+        return totalSeconds;
+    }
+
+    updateEstimatedTimeDisplay() {
+        if (!this.ui.initialBpmInput) return; // Safety check
+        const initBpm = parseInt(this.ui.initialBpmInput.value) || 0;
+        const finBpm  = parseInt(this.ui.finalBpmInput.value) || 0;
+        const inc     = parseInt(this.ui.incrementInput.value) || 5;
+        const bars    = parseInt(this.ui.barsInput.value) || 4;
+        const totalSec = this.calculateEstimatedTime(initBpm, finBpm, inc, bars);
+        const minutes = Math.floor(totalSec / 60);
+        const seconds = Math.round(totalSec % 60);
+        if (this.ui.estimatedTimeDisplay) {
+            this.ui.estimatedTimeDisplay.textContent = `Estimated time: ${minutes} min ${seconds} sec`;
         }
     }
-    // Add one extra lap at the final BPM
-    totalSeconds += (bars * clicks * 60) / fin;
-    return totalSeconds;
-}
 
-function updateEstimatedTimeDisplay() {
-    const initBpm = parseInt(initialBpmInput.value) || 0;
-    const finBpm  = parseInt(finalBpmInput.value) || 0;
-    const inc     = parseInt(incrementInput.value) || 5;
-    const bars    = parseInt(barsInput.value) || 4;
-    const totalSec = calculateEstimatedTime(initBpm, finBpm, inc, bars);
-    const minutes = Math.floor(totalSec / 60);
-    const seconds = Math.round(totalSec % 60);
-    estimatedTimeDisplay.textContent = `Estimated time: ${minutes} min ${seconds} sec`;
-}
+    updateEstimatedTimeDisplayDebounced() {
+        clearTimeout(this.debounceTimer);
+        this.debounceTimer = setTimeout(() => this.updateEstimatedTimeDisplay(), 300);
+    }
 
-function updateEstimatedTimeDisplayDebounced() {
-    clearTimeout(debounceTimer);
-    debounceTimer = setTimeout(updateEstimatedTimeDisplay, 300);
-}
+    openPopup() {
+        this.loadSettings();
+        this.updateEstimatedTimeDisplay();
+    }
 
-// ---------- Speed Mode Event Listeners ----------
-closePopup.addEventListener('click', () => {
-    speedModePopup.style.display = 'none';
-});
+    // --- Strategy Interface ---
 
-saveSpeedMode.addEventListener('click', () => {
-    saveSpeedModeSettings();
-    speedModeEnabled = true;
-    // Assumes bpm, updateBpmDisplay, etc. are defined in script.js
-    bpm = initialBpm;
-    updateBpmDisplay();
-    speedModePopup.style.display = 'none';
-});
+    shouldPlay() { return true; }
 
-initialBpmInput.addEventListener('input', updateEstimatedTimeDisplayDebounced);
-finalBpmInput.addEventListener('input', updateEstimatedTimeDisplayDebounced);
-incrementInput.addEventListener('input', updateEstimatedTimeDisplayDebounced);
-barsInput.addEventListener('input', updateEstimatedTimeDisplayDebounced);
-
-initialBpmInput.addEventListener('input', updateEstimatedTimeDisplay);
-finalBpmInput.addEventListener('input', updateEstimatedTimeDisplay);
-incrementInput.addEventListener('input', updateEstimatedTimeDisplay);
-barsInput.addEventListener('input', updateEstimatedTimeDisplay);
-
-updateEstimatedTimeDisplay();
-
-// ---------- Speed Mode Increment Function ----------
-
-function incrementBpm() {
-    // This function is called from script.js (via resetInterval)
-    if (speedModeEnabled && isPlaying) {
-        clickCount++;
-        updateProgressIndicator();  // update progress after each click
+    onBeat(app) {
+        this.clickCount++;
+        this.updateProgressIndicator();
         
-        if (clickCount >= barsPerIncrement * 4) {
-            clickCount = 0;
-            updateProgressIndicator();  // reset indicator
-            if (bpm < finalBpm) {
-                // Increase BPM but do not pass finalBpm.
-                let newBpm = bpm + speedIncrement;
-                if (newBpm >= finalBpm) {
-                    bpm = finalBpm; // set final BPM and complete the lap
+        if (this.clickCount >= this.barsPerIncrement * 4) {
+            this.clickCount = 0;
+            this.updateProgressIndicator();
+            
+            if (app.bpm < this.finalBpm) {
+                let newBpm = app.bpm + this.speedIncrement;
+                if (newBpm >= this.finalBpm) {
+                    app.setBpm(this.finalBpm);
                 } else {
-                    bpm = newBpm;
+                    app.setBpm(newBpm);
                 }
-                updateBpmDisplay();
-                resetInterval();
             } else {
-                // Already at final BPM: complete this lap and then stop.
-                stopMetronome();
-                // Optionally, reset bpm (if desired)
-                bpm = initialBpm;
-                updateBpmDisplay();
-                speedModeEnabled = false;
-                speedIcon.setAttribute('src', 'icons/speed_off.png');
-                fluteAudio.currentTime = 0;
-                fluteAudio.play();
-                currentMode = MODE_0;
+                // Finished
+                app.stop();
+                app.setBpm(this.initialBpm);
+                app.setStrategy('NORMAL');
+                
+                app.ui.speedIcon.dataset.state = 'off';
+                app.ui.speedIcon.style.opacity = '';
+                app.ui.speedIcon.style.color = '';
+                
+                app.fluteAudio.currentTime = 0;
+                app.fluteAudio.play();
+                app.timerMode = app.MODE_TIMER_INITIAL;
             }
         }
     }
+    
+    reset() {
+        this.clickCount = 0;
+        this.updateProgressIndicator();
+    }
+
+    updateProgressIndicator() {
+        if (!this.ui.progressBar) return;
+        const totalClicks = this.barsPerIncrement * 4;
+        let progress = this.clickCount / totalClicks;
+        let offset = this.circumference * (1 - progress);
+        this.ui.progressBar.style.strokeDashoffset = offset;
+    }
+
+    adjustProgressIndicatorSizing() {
+        const playIcon = document.getElementById('playPauseBtn');
+        if (!playIcon) return;
+        
+        const circleContainer = document.querySelector('.play-circle-container');
+        const progressIndicator = document.querySelector('.progress-indicator');
+        const progressBg = document.querySelector('.progress-bg');
+        const progressBarEl = document.querySelector('.progress-bar');
+
+        const iconRect = playIcon.getBoundingClientRect();
+        const iconSize = iconRect.width || 40; // Fallback
+        const containerSize = iconSize * 1.1;
+
+        if (circleContainer) {
+            circleContainer.style.width = containerSize + 'px';
+            circleContainer.style.height = containerSize + 'px';
+        }
+        if (progressIndicator) {
+            progressIndicator.style.width = containerSize + 'px';
+            progressIndicator.style.height = containerSize + 'px';
+            progressIndicator.setAttribute('viewBox', `0 0 ${containerSize} ${containerSize}`);
+        }
+
+        const strokeW = containerSize * 0.1;
+        const radius = containerSize / 2 - strokeW / 2;
+        const center = containerSize / 2;
+
+        if (progressBg) {
+            progressBg.setAttribute('cx', center);
+            progressBg.setAttribute('cy', center);
+            progressBg.setAttribute('r', radius);
+            progressBg.setAttribute('stroke-width', strokeW);
+        }
+
+        if (progressBarEl) {
+            progressBarEl.setAttribute('cx', center);
+            progressBarEl.setAttribute('cy', center);
+            progressBarEl.setAttribute('r', radius);
+            progressBarEl.setAttribute('stroke-width', strokeW);
+
+            const newCircumference = 2 * Math.PI * radius;
+            progressBarEl.setAttribute('stroke-dasharray', newCircumference);
+            progressBarEl.setAttribute('stroke-dashoffset', newCircumference);
+            this.circumference = newCircumference;
+        }
+    }
 }
 
-// Use the already-defined global variable "progressBar"
-function updateProgressIndicator() {
-    if (!progressBar) return;
-    const totalClicks = barsPerIncrement * 4;  // a lap consists of these many clicks
-    let progress = clickCount / totalClicks;   // value between 0 and 1
-    let offset = circumference * (1 - progress);
-    progressBar.style.strokeDashoffset = offset;
-}
+const speedModeStrategy = new SpeedModeStrategy();
 
-function adjustProgressIndicatorSizing() {
-    const playIcon = document.getElementById('playPauseBtn');
-    const circleContainer = document.querySelector('.play-circle-container');
-    const progressIndicator = document.querySelector('.progress-indicator');
-    const progressBg = document.querySelector('.progress-bg');
-    const progressBarEl = document.querySelector('.progress-bar');
-
-    // Get the current play icon size (assume square)
-    const iconRect = playIcon.getBoundingClientRect();
-    const iconSize = iconRect.width;
-    // Set container size to be 10% larger than the icon
-    const containerSize = iconSize * 1.1;
-
-    // Update container and SVG sizes
-    circleContainer.style.width = containerSize + 'px';
-    circleContainer.style.height = containerSize + 'px';
-    progressIndicator.style.width = containerSize + 'px';
-    progressIndicator.style.height = containerSize + 'px';
-    // Set the viewBox so our SVG coordinates run from 0 to containerSize
-    progressIndicator.setAttribute('viewBox', `0 0 ${containerSize} ${containerSize}`);
-
-    // Define stroke width relative to container size (10% in this example)
-    const strokeW = containerSize * 0.1;
-    // Calculate circle radius: half container minus half of stroke
-    const radius = containerSize / 2 - strokeW / 2;
-    const center = containerSize / 2;
-
-    // Configure background circle
-    progressBg.setAttribute('cx', center);
-    progressBg.setAttribute('cy', center);
-    progressBg.setAttribute('r', radius);
-    progressBg.setAttribute('fill', 'none');
-    progressBg.setAttribute('stroke', '#ccc');
-    progressBg.setAttribute('stroke-width', strokeW);
-
-    // Configure progress circle
-    progressBarEl.setAttribute('cx', center);
-    progressBarEl.setAttribute('cy', center);
-    progressBarEl.setAttribute('r', radius);
-    progressBarEl.setAttribute('fill', 'none');
-    progressBarEl.setAttribute('stroke', '#29be6f');
-    progressBarEl.setAttribute('stroke-width', strokeW);
-
-    // Calculate new circumference and update dash values.
-    const newCircumference = 2 * Math.PI * radius;
-    progressBarEl.setAttribute('stroke-dasharray', newCircumference);
-    progressBarEl.setAttribute('stroke-dashoffset', newCircumference);
-
-    // Update global circumference for progress updates.
-    circumference = newCircumference;
-}
-
-// Call this function when DOM is ready (or at the start of speed mode)
-document.addEventListener('DOMContentLoaded', adjustProgressIndicatorSizing);
-// Also call adjustProgressIndicatorSizing() just before starting speed mode if needed.
+// Register when app is ready (event-driven)
+window.addEventListener('metronome:ready', (e) => {
+    const app = e.detail;
+    speedModeStrategy.init();
+    app.registerStrategy('SPEED', speedModeStrategy);
+});

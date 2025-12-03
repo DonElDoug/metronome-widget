@@ -1,58 +1,139 @@
-// ---------- Random Mode Variables ----------
-let randomModeEnabled = false;
-let randomSilencePattern = [];
-let randomBarCounter = 0;
-let randomClickCounter = 0;
+// ----------------------------------------------------
+// Random Mode Strategy
+// ----------------------------------------------------
 
-const randomModePopup = document.getElementById('randomModePopup');
-const closeRandomPopup = document.getElementById('closeRandomPopup');
-const saveRandomMode = document.getElementById('saveRandomMode');
-const randomPercentInput = document.getElementById('randomPercent');
-const randomBarsInput = document.getElementById('randomBars');
-
-// ---------- Random Mode Functions ----------
-function loadRandomModeSettings() {
-    const storedRandomPercent = localStorage.getItem('randomPercent');
-    const storedRandomBars = localStorage.getItem('randomBars');
-    randomPercentInput.value = storedRandomPercent ? parseInt(storedRandomPercent) : 50;
-    randomBarsInput.value = storedRandomBars ? parseInt(storedRandomBars) : 10;
-}
-
-function saveRandomModeSettings() {
-    localStorage.setItem('randomPercent', randomPercentInput.value);
-    localStorage.setItem('randomBars', randomBarsInput.value);
-}
-
-function getRandomBarsSilenced(totalBars, randomPercent) {
-    const result = new Array(totalBars).fill(false);
-    // First bar always audible
-    const toMute = Math.floor((randomPercent / 100) * (totalBars - 1));
-    let indexes = [...Array(totalBars - 1).keys()].map(i => i + 1);
-    // Shuffle array
-    for (let i = indexes.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [indexes[i], indexes[j]] = [indexes[j], indexes[i]];
+class RandomModeStrategy {
+    constructor() {
+        this.pattern = [];
+        this.barCounter = 0;
+        this.clickCounter = 0;
+        this.ui = {}; // Initialize empty
     }
-    indexes.slice(0, toMute).forEach(idx => result[idx] = true);
-    return result;
+
+    init() {
+        this.ui = {
+            popup: document.getElementById('randomModePopup'),
+            closeBtn: document.getElementById('closeRandomPopup'),
+            saveBtn: document.getElementById('saveRandomMode'),
+            percentInput: document.getElementById('randomPercent'),
+            barsInput: document.getElementById('randomBars')
+        };
+        this.bindEvents();
+    }
+
+    bindEvents() {
+        if (this.ui.closeBtn) {
+            this.ui.closeBtn.addEventListener('click', () => {
+                this.ui.popup.style.display = 'none';
+            });
+        }
+
+        if (this.ui.saveBtn) {
+            this.ui.saveBtn.addEventListener('click', () => {
+                this.saveSettings();
+                this.buildPattern();
+                if (window.metronomeApp) {
+                    window.metronomeApp.setStrategy('RANDOM');
+                    this.ui.popup.style.display = 'none';
+                }
+            });
+        }
+    }
+
+    loadSettings() {
+        const p = localStorage.getItem('randomPercent');
+        const b = localStorage.getItem('randomBars');
+        this.ui.percentInput.value = p ? parseInt(p) : 50;
+        this.ui.barsInput.value = b ? parseInt(b) : 10;
+    }
+
+    saveSettings() {
+        const percent = parseInt(this.ui.percentInput.value);
+        const bars = parseInt(this.ui.barsInput.value);
+
+        // Validation
+        if (isNaN(percent) || percent < 0 || percent > 100) {
+            alert('Random % must be between 0 and 100');
+            return;
+        }
+        if (isNaN(bars) || bars < 1 || bars > 100) {
+            alert('Bars must be between 1 and 100');
+            return;
+        }
+
+        localStorage.setItem('randomPercent', percent);
+        localStorage.setItem('randomBars', bars);
+    }
+
+    openPopup() {
+        this.loadSettings();
+        this.buildPattern();
+    }
+
+    buildPattern() {
+        const totalBars = parseInt(this.ui.barsInput.value) || 10;
+        const percent = parseInt(this.ui.percentInput.value) || 50;
+        this.pattern = this.generatePattern(totalBars, percent);
+        this.barCounter = 0;
+        this.clickCounter = 0;
+    }
+
+    generatePattern(total, percent) {
+        const result = new Array(total).fill(false);
+        // First bar always audible (index 0 is false)
+        const toMute = Math.floor((percent / 100) * (total - 1));
+        let indexes = [...Array(total - 1).keys()].map(i => i + 1);
+        // Shuffle
+        for (let i = indexes.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [indexes[i], indexes[j]] = [indexes[j], indexes[i]];
+        }
+        indexes.slice(0, toMute).forEach(idx => result[idx] = true);
+        return result;
+    }
+
+    // --- Strategy Interface ---
+
+    shouldPlay() {
+        // If current bar is silenced (true), return false
+        return !this.pattern[this.barCounter];
+    }
+
+    onBeat(app) {
+        this.clickCounter++;
+        if (this.clickCounter >= 4) {
+            this.clickCounter = 0;
+            this.barCounter++;
+            
+            if (this.barCounter >= this.pattern.length) {
+                // Finished
+                app.stop();
+                app.setStrategy('NORMAL');
+                
+                // Reset UI
+                app.ui.speedIcon.dataset.state = 'off';
+                app.ui.speedIcon.style.opacity = '';
+                app.ui.speedIcon.style.color = '';
+                
+                app.fluteAudio.currentTime = 0;
+                app.fluteAudio.play();
+                app.timerMode = app.MODE_TIMER_INITIAL;
+                app.showResetIcon();
+            }
+        }
+    }
+    
+    reset() {
+        this.barCounter = 0;
+        this.clickCounter = 0;
+    }
 }
 
-function buildRandomSilencePattern() {
-    const totalBars = parseInt(randomBarsInput.value) || 10;
-    const randomPercent = parseInt(randomPercentInput.value) || 50;
-    randomSilencePattern = getRandomBarsSilenced(totalBars, randomPercent);
-    randomBarCounter = 0;
-    randomClickCounter = 0;
-}
+const randomModeStrategy = new RandomModeStrategy();
 
-// ---------- Random Mode Event Listeners ----------
-closeRandomPopup.addEventListener('click', () => {
-    randomModePopup.style.display = 'none';
-});
-
-saveRandomMode.addEventListener('click', () => {
-    saveRandomModeSettings();
-    buildRandomSilencePattern(); 
-    randomModeEnabled = true;
-    randomModePopup.style.display = 'none';
+// Register when app is ready (event-driven)
+window.addEventListener('metronome:ready', (e) => {
+    const app = e.detail;
+    randomModeStrategy.init();
+    app.registerStrategy('RANDOM', randomModeStrategy);
 });
