@@ -15,6 +15,8 @@
   <div class="bpm_container">
     <!-- Speed Icon -->
     <img src="icons/speed_off.png" id="speedIcon" class="speed-icon" alt="Mode Toggle" data-mode="speed" data-state="off" />
+    <!-- Settings Icon -->
+    <img src="icons/settings.png" id="settingsIcon" class="settings-icon" alt="Settings" />
     <!-- Timer Display -->
     <div class="timer-display">00:00;00</div>
     <img src="icons/refresh_icon.png" class="reset-icon" style="display: none;" />
@@ -79,6 +81,19 @@
         <input type="number" id="randomBars" value="10" />
       </div>
       <button id="saveRandomMode">Save</button>
+    </div>
+  </div>
+
+  <!-- Settings Popup -->
+  <div id="settingsPopup" class="speed-mode-popup" style="display: none;">
+    <div class="popup-content">
+      <span id="closeSettingsPopup" class="close-popup">&times;</span>
+      <h2>Background Color</h2>
+      <div class="color-picker-wrapper">
+        <input type="color" id="bgColorPicker" value="#262626" />
+        <div id="colorPreview" class="color-preview"></div>
+      </div>
+      <button id="saveSettings">Save</button>
     </div>
   </div>
 </body>

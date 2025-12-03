@@ -125,6 +125,23 @@ body {
   transform: scale(1.1);
 }
 
+/* Settings Icon */
+.settings-icon {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  height: 24px;
+  width: auto;
+  cursor: pointer;
+  opacity: 0.7;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.settings-icon:hover {
+  opacity: 1;
+  transform: rotate(90deg) scale(1.1);
+}
+
 /* Speed Mode Popup */
 .speed-mode-popup {
   position: fixed;
@@ -280,4 +297,47 @@ button#saveRandomMode:hover {
   stroke-width: 5px;
   fill: none;
   opacity: 0.2;
+}
+
+/* Color Picker Styles */
+.color-picker-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+  margin: 20px 0;
+}
+
+#bgColorPicker {
+  width: 200px;
+  height: 50px;
+  border: 2px solid #888888;
+  border-radius: 8px;
+  cursor: pointer;
+  background-color: #333333;
+}
+
+.color-preview {
+  width: 200px;
+  height: 30px;
+  border: 2px solid #888888;
+  border-radius: 5px;
+  background-color: #262626;
+}
+
+button#saveSettings {
+  margin-top: 10px;
+  padding: 8px 20px;
+  align-self: center;
+  background-color: #29be6f;
+  color: #ffffff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-family: 'iAWriterMonoS', monospace;
+  transition: background-color 0.3s ease;
+}
+
+button#saveSettings:hover {
+  background-color: #24a65e;
 }

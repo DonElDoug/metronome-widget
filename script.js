@@ -409,3 +409,49 @@ function hideResetIcon() {
     isDragging = false;
   }
 })();
+
+// ---------------------
+// 13) Settings (Background Color)
+// ---------------------
+const settingsIcon = document.getElementById('settingsIcon');
+const settingsPopup = document.getElementById('settingsPopup');
+const closeSettingsPopup = document.getElementById('closeSettingsPopup');
+const saveSettings = document.getElementById('saveSettings');
+const bgColorPicker = document.getElementById('bgColorPicker');
+const colorPreview = document.querySelector('.color-preview');
+
+// Load saved background color
+function loadBackgroundColor() {
+  const savedColor = localStorage.getItem('backgroundColor') || '#262626';
+  document.body.style.backgroundColor = savedColor;
+  document.querySelector('.bpm_container').style.backgroundColor = savedColor;
+  bgColorPicker.value = savedColor;
+  colorPreview.style.backgroundColor = savedColor;
+}
+
+// Settings icon click
+settingsIcon.addEventListener('click', () => {
+  settingsPopup.style.display = 'block';
+});
+
+// Close settings popup
+closeSettingsPopup.addEventListener('click', () => {
+  settingsPopup.style.display = 'none';
+});
+
+// Update color preview when color picker changes
+bgColorPicker.addEventListener('input', (e) => {
+  colorPreview.style.backgroundColor = e.target.value;
+});
+
+// Save settings
+saveSettings.addEventListener('click', () => {
+  const selectedColor = bgColorPicker.value;
+  document.body.style.backgroundColor = selectedColor;
+  document.querySelector('.bpm_container').style.backgroundColor = selectedColor;
+  localStorage.setItem('backgroundColor', selectedColor);
+  settingsPopup.style.display = 'none';
+});
+
+// Initialize background color on load
+loadBackgroundColor();
