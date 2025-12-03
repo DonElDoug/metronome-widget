@@ -339,18 +339,17 @@ button:active {
 /* Color Picker Specifics */
 .color-picker-wrapper {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 15px;
-  margin-bottom: 10px;
+  justify-content: flex-end;
 }
 
-#bgColorPicker {
-  width: 100px;
-  height: 50px;
+#bgColorPicker, #fontColorPicker, #accentColorPicker {
+  width: 60px;
+  height: 40px;
   border: none;
   background: none;
   cursor: pointer;
+  padding: 0;
 }
 
 /* Media Queries for Specific Adjustments */

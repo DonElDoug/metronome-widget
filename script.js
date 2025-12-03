@@ -411,22 +411,56 @@ function hideResetIcon() {
 })();
 
 // ---------------------
-// 13) Settings (Background Color)
+// 13) Settings (Theme: Background, Font, Accent)
 // ---------------------
 const settingsIcon = document.getElementById('settingsIcon');
 const settingsPopup = document.getElementById('settingsPopup');
 const closeSettingsPopup = document.getElementById('closeSettingsPopup');
 const saveSettings = document.getElementById('saveSettings');
-const bgColorPicker = document.getElementById('bgColorPicker');
-const colorPreview = document.querySelector('.color-preview');
 
-// Load saved background color
-function loadBackgroundColor() {
-  const savedColor = localStorage.getItem('backgroundColor') || '#262626';
-  document.body.style.backgroundColor = savedColor;
-  document.querySelector('.bpm_container').style.backgroundColor = savedColor;
-  bgColorPicker.value = savedColor;
-  colorPreview.style.backgroundColor = savedColor;
+const bgColorPicker = document.getElementById('bgColorPicker');
+const fontColorPicker = document.getElementById('fontColorPicker');
+const accentColorPicker = document.getElementById('accentColorPicker');
+
+// Helper to darken color for hover state
+function darkenColor(hex, amount = -20) {
+  let usePound = false;
+  if (hex[0] === "#") {
+    hex = hex.slice(1);
+    usePound = true;
+  }
+  let num = parseInt(hex, 16);
+  let r = (num >> 16) + amount;
+  if (r > 255) r = 255; else if (r < 0) r = 0;
+  
+  let b = ((num >> 8) & 0x00FF) + amount;
+  if (b > 255) b = 255; else if (b < 0) b = 0;
+  
+  let g = (num & 0x0000FF) + amount;
+  if (g > 255) g = 255; else if (g < 0) g = 0;
+  
+  return (usePound ? "#" : "") + (g | (b << 8) | (r << 16)).toString(16).padStart(6, '0');
+}
+
+function applyTheme(bg, font, accent) {
+  const root = document.documentElement;
+  root.style.setProperty('--bg-color', bg);
+  root.style.setProperty('--text-color', font);
+  root.style.setProperty('--accent-color', accent);
+  root.style.setProperty('--accent-hover', darkenColor(accent, -20));
+}
+
+// Load saved theme
+function loadTheme() {
+  const savedBg = localStorage.getItem('theme_bg') || '#262626';
+  const savedFont = localStorage.getItem('theme_font') || '#ffffff';
+  const savedAccent = localStorage.getItem('theme_accent') || '#29be6f';
+
+  bgColorPicker.value = savedBg;
+  fontColorPicker.value = savedFont;
+  accentColorPicker.value = savedAccent;
+
+  applyTheme(savedBg, savedFont, savedAccent);
 }
 
 // Settings icon click
@@ -437,21 +471,40 @@ settingsIcon.addEventListener('click', () => {
 // Close settings popup
 closeSettingsPopup.addEventListener('click', () => {
   settingsPopup.style.display = 'none';
+  // Revert to saved if cancelled? 
+  // For now, we keep the live changes or we could reload. 
+  // Let's reload to ensure "Cancel" behavior if user didn't click save.
+  loadTheme(); 
 });
 
-// Update color preview when color picker changes
+// Live Preview Listeners
 bgColorPicker.addEventListener('input', (e) => {
-  colorPreview.style.backgroundColor = e.target.value;
+  document.documentElement.style.setProperty('--bg-color', e.target.value);
+});
+
+fontColorPicker.addEventListener('input', (e) => {
+  document.documentElement.style.setProperty('--text-color', e.target.value);
+});
+
+accentColorPicker.addEventListener('input', (e) => {
+  const accent = e.target.value;
+  document.documentElement.style.setProperty('--accent-color', accent);
+  document.documentElement.style.setProperty('--accent-hover', darkenColor(accent, -20));
 });
 
 // Save settings
 saveSettings.addEventListener('click', () => {
-  const selectedColor = bgColorPicker.value;
-  document.body.style.backgroundColor = selectedColor;
-  document.querySelector('.bpm_container').style.backgroundColor = selectedColor;
-  localStorage.setItem('backgroundColor', selectedColor);
+  const bg = bgColorPicker.value;
+  const font = fontColorPicker.value;
+  const accent = accentColorPicker.value;
+
+  localStorage.setItem('theme_bg', bg);
+  localStorage.setItem('theme_font', font);
+  localStorage.setItem('theme_accent', accent);
+
+  applyTheme(bg, font, accent);
   settingsPopup.style.display = 'none';
 });
 
-// Initialize background color on load
-loadBackgroundColor();
+// Initialize theme on load
+loadTheme();

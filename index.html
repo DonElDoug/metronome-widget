@@ -90,11 +90,29 @@
   <div id="settingsPopup" class="speed-mode-popup" style="display: none;">
     <div class="popup-content">
       <span id="closeSettingsPopup" class="close-popup">&times;</span>
-      <h2>Background Color</h2>
-      <div class="color-picker-wrapper">
-        <input type="color" id="bgColorPicker" value="#262626" />
-        <div id="colorPreview" class="color-preview"></div>
+      <h2>Theme Settings</h2>
+      
+      <div class="input-row">
+        <label for="bgColorPicker">Background:</label>
+        <div class="color-picker-wrapper">
+          <input type="color" id="bgColorPicker" value="#262626" />
+        </div>
       </div>
+
+      <div class="input-row">
+        <label for="fontColorPicker">Font Color:</label>
+        <div class="color-picker-wrapper">
+          <input type="color" id="fontColorPicker" value="#ffffff" />
+        </div>
+      </div>
+
+      <div class="input-row">
+        <label for="accentColorPicker">Accent Color:</label>
+        <div class="color-picker-wrapper">
+          <input type="color" id="accentColorPicker" value="#29be6f" />
+        </div>
+      </div>
+
       <button id="saveSettings">Save</button>
     </div>
   </div>
