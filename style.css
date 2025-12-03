@@ -242,7 +242,7 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  /* Removed justify-content: center to prevent overflow issues */
   padding: 30px;
   box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
   animation: fadeIn 0.3s ease-in-out;
@@ -258,6 +258,7 @@ body {
 }
 
 .popup-content h2 {
+  margin-top: 10px;
   margin-bottom: 25px;
   font-size: 1.5rem;
   text-align: center;
@@ -275,8 +276,9 @@ body {
 
 .popup-content label {
   text-align: left;
-  width: 60%;
+  flex: 1; /* Allow label to take available space */
   font-size: 1.1rem;
+  white-space: nowrap; /* Prevent wrapping */
 }
 
 .popup-content input {
@@ -298,10 +300,13 @@ body {
   cursor: pointer;
   font-size: 1.5rem;
   padding: 5px;
+  line-height: 1;
+  z-index: 1001;
 }
 
 button#saveSpeedMode, button#saveRandomMode, button#saveSettings {
   margin-top: 20px;
+  margin-bottom: 10px; /* Add bottom margin */
   padding: 12px 30px;
   background-color: var(--accent-color);
   color: #ffffff;
@@ -341,15 +346,23 @@ button:active {
   display: flex;
   align-items: center;
   justify-content: flex-end;
+  width: 60px; /* Fixed width for the wrapper */
+  height: 40px;
+  overflow: hidden; /* Ensure input doesn't spill out */
+  border-radius: 8px;
+  border: 1px solid #555;
+  background-color: var(--input-bg);
 }
 
 #bgColorPicker, #fontColorPicker, #accentColorPicker {
-  width: 60px;
-  height: 40px;
+  width: 150%; /* Make it larger than wrapper to hide default browser borders */
+  height: 150%;
   border: none;
   background: none;
   cursor: pointer;
   padding: 0;
+  margin: -10px; /* Offset to center the color area */
+  transform: scale(1.2);
 }
 
 /* Media Queries for Specific Adjustments */
