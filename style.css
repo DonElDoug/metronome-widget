@@ -32,19 +32,22 @@ body {
   height: 280px;
   background-color: #262626;
   border-radius: 0px;
-  position: relative;
   padding: 20px;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  align-items: center;
+  justify-items: center;
 }
 
 /* 4. BPM Controls */
 .bpm-wrapper {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 30px;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  grid-row: 2;
 }
 
 /* 5. BPM Text */
@@ -75,10 +78,9 @@ body {
 
 /* 7. Play Button */
 .play-button-container {
-  position: absolute;
-  bottom: 30px;
-  left: 50%;
-  transform: translateX(-50%);
+  grid-row: 3;
+  align-self: end;
+  margin-bottom: 10px;
 }
 
 .play-icon {
@@ -91,30 +93,29 @@ body {
 .timer-display {
   font-size: 28px;
   color: #ffffff;
-  position: absolute;
-  top: calc(50% - 36px - 17.5px - 35px);
-  left: 50%;
-  transform: translateX(-50%);
   user-select: none;
+  grid-row: 1;
+  margin-top: 20px;
 }
 
 /* Reset Icon */
 .reset-icon {
-  position: absolute;
   width: 25px;
   height: auto;
   cursor: pointer;
   display: none;
-  left: calc(50% + 25px + 78px);
-  top: calc(50% - 25px - 28px - 36px);
   user-select: none;
+  position: absolute;
+  top: 40px;
+  left: 50%;
+  margin-left: 110px;
 }
 
 /* Speed Icon */
 .speed-icon {
   position: absolute;
-  top: calc(50% - 90px);
-  left: calc(50% - 118px);
+  top: 20px;
+  left: 20px;
   height: 30px;
   width: auto;
   cursor: pointer;
