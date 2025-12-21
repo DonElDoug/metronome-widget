@@ -194,7 +194,7 @@ function App() {
                 setIsPlaying(false);
                 setSpeedConfig(null);
                 // Flute play...
-                const flute = new Audio('/audio/flute_japan.mp3');
+                const flute = new Audio('./audio/flute_japan.mp3');
                 flute.play().catch(e => console.error("Flute play error", e));
             } else {
                 let newBpm = bpm + speedConfig.increment;
