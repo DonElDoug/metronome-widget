@@ -1,0 +1,131 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    :root {
+        --bg-color: #191919;
+        --card-bg: #262626;
+        --text-color: #ffffff;
+        --accent-color: #29be6f;
+        --accent-rgb: 41, 190, 111;
+        --accent-hover: #24a65e;
+        --speed-color: #0ea5e9;
+        --speed-rgb: 14, 165, 233;
+        --random-color: #d946ef;
+        --random-rgb: 217, 70, 239;
+    }
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+}
+
+/* Firefox Scrollbar Support */
+.scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+    width: 4px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+    display: none;
+}
+
+.scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+/* Cross-Browser SVG Fixes */
+svg {
+    overflow: visible;
+    /* Prevent shadow clipping */
+}
+
+@keyframes tap-pulse {
+    0% {
+        transform: scale(0.98);
+        box-shadow: 0 0 0 0 rgba(var(--accent-rgb), 0.4);
+    }
+
+    40% {
+        transform: scale(1.02);
+        box-shadow: 0 0 0 25px rgba(var(--accent-rgb), 0);
+    }
+
+    100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(var(--accent-rgb), 0);
+    }
+}
+
+/* Glassy 2026 Utilities */
+.glass-ring-base {
+    stroke: rgba(255, 255, 255, 0.1);
+    filter: none;
+    transition: all 0.1s ease-out;
+}
+
+.glass-flash-strong {
+    stroke: var(--accent-color);
+    opacity: 1;
+    filter: drop-shadow(0 0 2px var(--accent-color));
+    /* Sharp optical glow */
+    stroke-width: 4px;
+}
+
+.glass-flash-weak {
+    stroke: var(--accent-color);
+    opacity: 0.5;
+    stroke-width: 3px;
+    filter: none;
+}
+
+/* Layered Neumorphism Utilities */
+.neu-layered-raised {
+    box-shadow:
+        8px 8px 16px rgba(0, 0, 0, 0.4),
+        -4px -4px 12px rgba(255, 255, 255, 0.05),
+        inset 1px 1px 2px rgba(255, 255, 255, 0.05);
+    /* Subtle rim */
+}
+
+.neu-layered-pressed {
+    box-shadow:
+        inset 6px 6px 12px rgba(0, 0, 0, 0.6),
+        inset -4px -4px 10px rgba(255, 255, 255, 0.02);
+}
+
+/* Chrono-Dial Specifics (Cleaned Up) */
+.chrono-ring {
+    transition: stroke-dashoffset 0.1s linear, transform 0.2s ease-out;
+}
+
+.chrono-arc {
+    /* Driven by JS variable for precision */
+    transition: stroke-dashoffset 0s linear;
+}
+
+@font-face {
+    font-family: 'iAWriterMonoS';
+    src: url('/font/iAWriterMonoS-Regular.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
