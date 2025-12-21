@@ -30,10 +30,10 @@ export class MetronomeEngine {
     async init() {
         if (!this.audioContext) {
             this.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-            await this.loadSound('/audio/click.wav');
+            await this.loadSound('./audio/click.wav');
         }
 
-        if (this.audioContext.state === 'suspended') {
+        if (this.audioContext && this.audioContext.state === 'suspended') {
             await this.audioContext.resume();
         }
     }
