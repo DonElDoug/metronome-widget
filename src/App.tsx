@@ -106,7 +106,7 @@ function App() {
             // 2. Continuous Visualizer Updates (Speed Mode Only)
             // Normal Mode is now STATIC (Glassy Flash Only), no circulation.
             if (visualizerRef.current && currentTime > state.lastBeatTime) {
-                const { bpm, speedConfig } = state;
+                const { speedConfig } = state;
 
                 if (speedConfig) {
                     // Keep logic for Speed Mode (if meaningful) or refactor
