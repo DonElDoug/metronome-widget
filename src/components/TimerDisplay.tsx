@@ -19,15 +19,15 @@ export function TimerDisplay({ timeMs, onAddFiveMinutes, onReset, showReset }: T
 
         return (
             <div className="flex items-baseline font-mono tabular-nums leading-none tracking-tight">
-                <span className="text-[4vmin] font-semibold text-white">
+                <span className="text-[clamp(24px,6vmin,64px)] font-semibold text-white">
                     {String(minutes).padStart(2, '0')}
                 </span>
-                <span className="mx-1 opacity-5 font-thin text-[3.5vmin]">:</span>
-                <span className="text-[4vmin] font-semibold text-white">
+                <span className="mx-1 opacity-5 font-thin text-[clamp(20px,5vmin,40px)]">:</span>
+                <span className="text-[clamp(24px,6vmin,64px)] font-semibold text-white">
                     {String(seconds).padStart(2, '0')}
                 </span>
-                <span className="mx-0.5 opacity-5 text-[3.5vmin] font-thin">.</span>
-                <span className="text-[4vmin] font-light text-white opacity-40">
+                <span className="mx-0.5 opacity-5 text-[clamp(20px,5vmin,40px)] font-thin">.</span>
+                <span className="text-[clamp(24px,6vmin,64px)] font-light text-white opacity-40">
                     {String(hundredths).padStart(2, '0')}
                 </span>
             </div>
@@ -46,7 +46,7 @@ export function TimerDisplay({ timeMs, onAddFiveMinutes, onReset, showReset }: T
                 <button
                     onClick={(e) => { e.stopPropagation(); onReset(); }}
                     className="
-                        group relative w-[80px] h-[32px] rounded-full 
+                        group relative w-[ max(80px,10vmin) ] h-[ max(32px,4vmin) ] rounded-full 
                         flex items-center justify-center
                         transition-all duration-300 ease-out
                         overflow-hidden
@@ -69,7 +69,7 @@ export function TimerDisplay({ timeMs, onAddFiveMinutes, onReset, showReset }: T
                     />
 
                     <span
-                        className="relative z-10 text-[1.1vmin] font-bold tracking-widest transition-colors duration-300"
+                        className="relative z-10 text-[max(11px,1.3vmin)] font-bold tracking-widest transition-colors duration-300"
                         style={{ color: 'currentcolor' }}
                     >
                         RESET

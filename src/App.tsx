@@ -516,7 +516,7 @@ function App() {
                         ref={reactorRef}
                         onClick={togglePlay}
                         // Fluid sizing
-                        className={`relative w-[13vmin] h-[13vmin] rounded-full flex items-center justify-center transition-all duration-300 z-40 overflow-hidden group ${isPlaying ? 'neu-layered-pressed' : 'neu-layered-raised'}`}
+                        className={`relative w-[max(64px,13vmin)] h-[max(64px,13vmin)] rounded-full flex items-center justify-center transition-all duration-300 z-40 overflow-hidden group ${isPlaying ? 'neu-layered-pressed' : 'neu-layered-raised'}`}
                         style={{
                             backgroundColor: 'var(--card-bg)',
                             color: 'var(--accent-color)',
@@ -538,7 +538,7 @@ function App() {
                                 <div className="w-2 h-8 bg-current rounded-full opacity-90 shadow-[0_0_10px_currentColor]" />
                             </div>
                         ) : (
-                            <Play size={48} className="ml-1.5 z-10 text-current opacity-70 transition-transform duration-300 hover:scale-110" fill="currentColor" />
+                            <Play size={48} className="ml-1.5 z-10 text-current opacity-100 transition-transform duration-300 hover:scale-110" fill="currentColor" />
                         )}
                     </button>
                 </div>
