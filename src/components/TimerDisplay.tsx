@@ -46,7 +46,7 @@ export function TimerDisplay({ timeMs, onAddFiveMinutes, onReset, showReset }: T
                 <button
                     onClick={(e) => { e.stopPropagation(); onReset(); }}
                     className="
-                        group relative w-[ max(80px,10vmin) ] h-[ max(32px,4vmin) ] rounded-full 
+                        group relative w-[ max(100px,12vmin) ] h-[ max(40px,5vmin) ] rounded-full 
                         flex items-center justify-center
                         transition-all duration-300 ease-out
                         overflow-hidden
@@ -55,7 +55,8 @@ export function TimerDisplay({ timeMs, onAddFiveMinutes, onReset, showReset }: T
                     style={{
                         backgroundColor: 'var(--card-bg)',
                         border: '1px solid rgba(255,255,255,0.03)',
-                        color: 'var(--accent-color)'
+                        color: 'var(--accent-color)',
+                        boxShadow: '0 0 15px -3px color-mix(in srgb, var(--accent-color), transparent 85%)'
                     }}
                     title="Reset Timer"
                 >
