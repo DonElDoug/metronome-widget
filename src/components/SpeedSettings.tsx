@@ -7,6 +7,7 @@ interface SpeedSettingsProps {
     isOpen: boolean;
     onClose: () => void;
     onSave: (settings: SpeedSettingsData) => void;
+    currentTimeSignature?: { numerator: number; denominator: number } | null;
 }
 
 export interface SpeedSettingsData {
@@ -18,24 +19,28 @@ export interface SpeedSettingsData {
     estimatedDuration?: number; // In seconds
 }
 
-export function SpeedSettings({ isOpen, onClose, onSave }: SpeedSettingsProps) {
+export function SpeedSettings({ isOpen, onClose, onSave, currentTimeSignature }: SpeedSettingsProps) {
     const [startBpm, setStartBpm] = useState(100);
     const [endBpm, setEndBpm] = useState(180);
     const [increment, setIncrement] = useState(5);
     const [bars, setBars] = useState(4);
 
-    const calculateEstimatedTime = (initial: number, fin: number, inc: number, barCount: number, clicks = 4) => {
+    const beatsPerBar = currentTimeSignature?.numerator || 4;
+
+    const snapToEndBpm = (start: number, end: number, inc: number) => {
+        if (end <= start) return start + inc;
+        const diff = end - start;
+        const steps = Math.floor(diff / inc);
+        return start + (steps * inc);
+    };
+
+    const calculateEstimatedTime = (initial: number, fin: number, inc: number, barCount: number, clicks = beatsPerBar) => {
         if (initial >= fin) return (barCount * clicks * 60) / initial;
         let totalSeconds = 0;
         let currentBpm = initial;
         while (currentBpm < fin) {
             totalSeconds += (barCount * clicks * 60) / currentBpm;
-            let newBpm = currentBpm + inc;
-            if (newBpm >= fin) {
-                currentBpm = fin;
-            } else {
-                currentBpm = newBpm;
-            }
+            currentBpm += inc;
         }
         totalSeconds += (barCount * clicks * 60) / fin;
         return totalSeconds;
@@ -63,7 +68,8 @@ export function SpeedSettings({ isOpen, onClose, onSave }: SpeedSettingsProps) {
                     max={300}
                     onChange={([newStart, newEnd]) => {
                         setStartBpm(newStart);
-                        setEndBpm(newEnd);
+                        // Snap endBpm based on newStart and increment
+                        setEndBpm(snapToEndBpm(newStart, newEnd, increment));
                     }}
                 />
 
@@ -72,7 +78,10 @@ export function SpeedSettings({ isOpen, onClose, onSave }: SpeedSettingsProps) {
                     value={increment}
                     min={1}
                     max={20}
-                    onChange={setIncrement}
+                    onChange={(val) => {
+                        setIncrement(val);
+                        setEndBpm(prev => snapToEndBpm(startBpm, prev, val));
+                    }}
                 />
 
                 <Slider

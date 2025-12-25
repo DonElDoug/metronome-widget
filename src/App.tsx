@@ -23,8 +23,9 @@ function App() {
     // Mode States
     const [speedConfig, setSpeedConfig] = useState<SpeedSettingsData | null>(null);
     const [randomConfig, setRandomConfig] = useState<RandomSettingsData | null>(null);
+    const [speedCountdown, setSpeedCountdown] = useState<number | null>(null);
     const [soundType, setSoundType] = useState<SoundType>('click');
-    const [timeSignature, setTimeSignature] = useState<{ numerator: number, denominator: number } | null>({ numerator: 4, denominator: 4 });
+    const [timeSignature, setTimeSignature] = useState<{ numerator: number, denominator: number } | null>(null);
 
     // Visual Sync Queue
     const visualQueueRef = useRef<{ time: number; beat: number }[]>([]);
@@ -40,7 +41,7 @@ function App() {
         randomBarCounter: 0,
         randomPattern: [] as boolean[],
         lastBeatTime: 0,
-        timeSignature: { numerator: 4, denominator: 4 }, // Default 4/4
+        timeSignature: { numerator: 4, denominator: 4 }, // Standard for internal logic when TS is None
     });
 
     // Sync refs
@@ -52,17 +53,35 @@ function App() {
 
     useEffect(() => {
         engine.init();
+        if (!timeSignature) {
+            engine.setUseAccent(false);
+        }
 
         // Logic to determine if a note should play (Random Mode)
         engine.shouldPlayNote = (beatTotal) => {
             const { randomConfig } = stateRef.current;
             if (!randomConfig || !randomConfig.enabled) return true;
 
-            const beatsPerBar = 4;
+            const beatsPerBar = stateRef.current.timeSignature.numerator;
             const barIndex = Math.floor(beatTotal / beatsPerBar);
             const beatInBar = beatTotal % beatsPerBar;
 
             return getBarVisibility(barIndex, randomConfig.percentage, randomConfig.bars, beatInBar);
+        };
+
+        engine.getSoundOverride = (beatTotal) => {
+            const { speedConfig, timeSignature } = stateRef.current;
+            if (!speedConfig) return null;
+
+            const beatsPerBar = timeSignature?.numerator || 4;
+            const totalBeatsInStep = speedConfig.bars * beatsPerBar;
+            const currentBeatInStep = (beatTotal % totalBeatsInStep) + 1;
+            const warningStartBeat = totalBeatsInStep - beatsPerBar + 1;
+
+            if (currentBeatInStep >= warningStartBeat) {
+                return 'warning'; // Subtle pitch shift on current sound
+            }
+            return null;
         };
 
         const barVisibilityCache = new Map<number, boolean>();
@@ -131,7 +150,7 @@ function App() {
         };
     }, [isPlaying, engine]); // Removed bpm/timer dep to avoid re-running init logic unnecessarily
 
-    const handleVisualTick = (_beatIndex: number) => {
+    const handleVisualTick = (beat: number) => {
         const { speedConfig, timeSignature } = stateRef.current; // Get timeSignature
 
         // Glassy Flash Logic (Normal Mode)
@@ -163,39 +182,43 @@ function App() {
         }
 
         if (speedConfig && speedConfig.enabled) {
-            handleSpeedModeTick();
+            handleSpeedModeTick(beat);
         }
     };
 
-    const handleSpeedModeTick = () => {
-        const { speedConfig, bpm } = stateRef.current;
+    const handleSpeedModeTick = (beatTotal: number) => {
+        const { speedConfig, bpm, timeSignature } = stateRef.current;
         if (!speedConfig) return;
 
-        const beatsPerBar = 4;
+        const beatsPerBar = timeSignature?.numerator || 4;
         const totalBeatsInStep = speedConfig.bars * beatsPerBar;
-
-        stateRef.current.speedBarCounter++;
-        const currentStepBeat = stateRef.current.speedBarCounter;
+        const currentBeatInStep = (beatTotal % totalBeatsInStep) + 1;
 
         // Visualizer Update (Layered Ripple Style)
         if (visualizerRef.current) {
-            // Speed Mode: Fill the Orb based on progress
-            const progress = Math.min(currentStepBeat / totalBeatsInStep, 1);
+            const progress = Math.min(currentBeatInStep / totalBeatsInStep, 1);
             const circumference = 2 * Math.PI * 56;
             const offset = circumference * (1 - progress);
             visualizerRef.current.style.strokeDashoffset = offset.toString();
-            // Remove pulse animation in speed mode to focus on progress
         }
 
-        if (currentStepBeat >= totalBeatsInStep) {
-            stateRef.current.speedBarCounter = 0;
+        // Countdown Logic
+        const warningStartBeat = totalBeatsInStep - beatsPerBar + 1;
+
+        if (currentBeatInStep >= warningStartBeat) {
+            const countdownValue = totalBeatsInStep - currentBeatInStep + 1;
+            setSpeedCountdown(countdownValue);
+        } else {
+            setSpeedCountdown(null);
+        }
+
+        if (currentBeatInStep === totalBeatsInStep) {
             if (bpm >= speedConfig.endBpm) {
                 engine.stop();
                 timer.stop();
                 setIsPlaying(false);
                 setSpeedConfig(null);
-                // Flute play...
-                const flute = new Audio('./audio/flute_japan.mp3');
+                const flute = new Audio('/audio/flute_japan.mp3');
                 flute.play().catch(e => console.error("Flute play error", e));
             } else {
                 let newBpm = bpm + speedConfig.increment;
@@ -214,6 +237,7 @@ function App() {
             engine.stop();
             timer.stop();
             setIsPlaying(false);
+            setSpeedCountdown(null);
         } else {
             engine.start();
             timer.start();
@@ -447,12 +471,12 @@ function App() {
                                 setIsPlaying(false);
                             }
                             }
-                            showReset={!isPlaying && timer.timeMs > 0}
+                            showReset={!speedConfig && timer.timeMs > 0}
                         />
                     </div>
 
                     <div className="flex flex-col items-center justify-center w-full">
-                        <div className="flex items-center justify-center gap-[4vw] w-full" style={{ color: 'var(--accent-color)' }}>
+                        <div className="flex items-center justify-center gap-[2vw] w-full" style={{ color: 'var(--accent-color)' }}>
                             <button
                                 onClick={() => updateBpm(bpm - 1, true)}
                                 className="p-[1.5vmin] hover:scale-110 active:scale-95 transition-all duration-300 opacity-30 hover:opacity-100 group"
@@ -460,7 +484,7 @@ function App() {
                                 <Minus size={48} strokeWidth={1} className="transition-all" />
                             </button>
 
-                            <div className="flex flex-col items-center justify-center select-none py-[1vh]">
+                            <div className="flex flex-col items-center justify-center select-none py-[1vh] min-w-[max(180px,25vmin)]">
                                 <div className="text-[12vh] font-bold tabular-nums tracking-tighter leading-none transition-all duration-500">
                                     {bpm}
                                 </div>
@@ -485,9 +509,17 @@ function App() {
                     </div>
                 </div>
 
-
-
-
+                {/* Speed Change Warning Notification - Positioned slightly lower for balance */}
+                {speedCountdown !== null && (
+                    <div className="absolute top-[55%] left-1/2 -translate-x-1/2 flex flex-col items-center gap-0 z-50 pointer-events-none">
+                        <div className="text-[9px] uppercase tracking-[0.4em] text-white opacity-60 font-bold mb-1">
+                            Changing in
+                        </div>
+                        <div className="text-4xl font-black text-[var(--accent-color)] drop-shadow-[0_0_12px_var(--accent-color)]">
+                            {speedCountdown}
+                        </div>
+                    </div>
+                )}
 
                 {/* Layered Ripple Play Button (Minimalist & Organic) */}
                 <div className="relative group z-10 mb-[8vh] flex items-center justify-center">
@@ -501,7 +533,7 @@ function App() {
 
                     {/* The Ripple Orb (Interactive) - Progress Ring */}
                     <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
-                        <svg className="w-[21vmin] h-[21vmin] rotate-[-90deg]" viewBox="0 0 200 200">
+                        <svg className="w-[clamp(145px,32vmin,175px)] h-[clamp(145px,32vmin,175px)] rotate-[-90deg]" viewBox="0 0 200 200">
                             {/* Base Ring (Track - Neutral Dark) */}
                             <circle cx="100" cy="100" r="56" fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="6" className="opacity-100" />
 
@@ -511,7 +543,7 @@ function App() {
                                 cx="100" cy="100" r="56"
                                 fill="none"
                                 stroke="currentColor"
-                                strokeWidth="10"
+                                strokeWidth={speedConfig ? 14 : 10}
                                 strokeLinecap="round"
                                 style={{
                                     stroke: 'var(--accent-color)',
@@ -519,7 +551,9 @@ function App() {
                                     strokeDashoffset: speedConfig ? 2 * Math.PI * 56 : 0,
                                     opacity: speedConfig ? 1 : 0.8,
                                     transition: 'all 0.1s ease-out',
-                                    filter: 'drop-shadow(0 0 8px var(--accent-color))'
+                                    filter: speedConfig
+                                        ? 'drop-shadow(0 0 30px var(--accent-color)) brightness(1.3)'
+                                        : 'drop-shadow(0 0 15px var(--accent-color))'
                                 }}
                                 className={`chrono-ring glass-ring-base ${isPlaying && speedConfig ? 'animate-ring-heartbeat' : ''}`}
                             />
@@ -533,8 +567,8 @@ function App() {
                     <button
                         ref={reactorRef}
                         onClick={togglePlay}
-                        // Fluid sizing
-                        className={`relative w-[max(64px,13vmin)] h-[max(64px,13vmin)] rounded-full flex items-center justify-center transition-all duration-300 z-40 overflow-hidden group ${isPlaying ? 'neu-layered-pressed' : 'neu-layered-raised'}`}
+                        // Adaptive scaling: Very prominent in small windows, elegant in large ones
+                        className={`relative w-[clamp(115px,28vw,125px)] h-[clamp(115px,28vw,125px)] rounded-full flex items-center justify-center transition-all duration-300 z-40 overflow-hidden group ${isPlaying ? 'neu-layered-pressed' : 'neu-layered-raised'}`}
                         style={{
                             backgroundColor: 'var(--card-bg)',
                             color: 'var(--accent-color)',
@@ -545,12 +579,12 @@ function App() {
 
 
                         {isPlaying ? (
-                            <div className="flex gap-2.5 z-10 transition-transform duration-300 scale-90">
-                                <div className="w-2 h-8 bg-current rounded-full opacity-90 shadow-[0_0_10px_currentColor]" />
-                                <div className="w-2 h-8 bg-current rounded-full opacity-90 shadow-[0_0_10px_currentColor]" />
+                            <div className="flex gap-3 z-10 transition-transform duration-300 scale-90">
+                                <div className="w-2.5 h-10 bg-current rounded-full opacity-90 shadow-[0_0_12px_currentColor]" />
+                                <div className="w-2.5 h-10 bg-current rounded-full opacity-90 shadow-[0_0_12px_currentColor]" />
                             </div>
                         ) : (
-                            <Play size={48} className="ml-1.5 z-10 text-current opacity-100 transition-transform duration-300 hover:scale-110" fill="currentColor" style={{ filter: 'drop-shadow(0 0 8px currentColor)' }} />
+                            <Play size={56} className="ml-2 z-10 text-current opacity-100 transition-transform duration-300 hover:scale-110" fill="currentColor" style={{ filter: 'drop-shadow(0 0 8px currentColor)' }} />
                         )}
                     </button>
                 </div>
@@ -593,6 +627,7 @@ function App() {
                 isOpen={showSpeedSettings}
                 onClose={() => setShowSpeedSettings(false)}
                 onSave={handleSpeedSave}
+                currentTimeSignature={timeSignature}
             />
 
             <RandomSettings

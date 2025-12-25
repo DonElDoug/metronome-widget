@@ -5,8 +5,8 @@ import { ColorInput } from "./ui/ColorInput";
 interface SettingsModalProps {
     isOpen: boolean;
     onClose: () => void;
-    onSoundChange: (sound: 'click' | 'beep' | 'woodblock' | 'hihat') => void;
-    currentSound: 'click' | 'beep' | 'woodblock' | 'hihat';
+    onSoundChange: (sound: 'click' | 'beep' | 'woodblock' | 'hihat' | 'woodblock-high' | 'warning') => void;
+    currentSound: 'click' | 'beep' | 'woodblock' | 'hihat' | 'woodblock-high' | 'warning';
 }
 
 type ThemePreset = {

@@ -3,7 +3,7 @@ export type ScheduledNote = {
     beat: number;
 };
 
-export type SoundType = 'click' | 'beep' | 'woodblock' | 'hihat';
+export type SoundType = 'click' | 'beep' | 'woodblock' | 'hihat' | 'woodblock-high' | 'warning';
 
 export class MetronomeEngine {
     audioContext: AudioContext | null = null;
@@ -22,6 +22,7 @@ export class MetronomeEngine {
     // Callbacks
     onTick: ((beat: number, time: number) => void) | null = null;
     shouldPlayNote: ((beat: number) => boolean) | null = null;
+    getSoundOverride: ((beat: number) => SoundType | null) | null = null;
 
     // Sound buffers
     clickBuffer: AudioBuffer | null = null;
@@ -111,14 +112,21 @@ export class MetronomeEngine {
         if (!this.shouldPlayNote || this.shouldPlayNote(this.beatCount)) {
             const isAccent = this.useAccent && (this.beatCount % this.beatsPerBar === 0);
 
-            if (this.soundType === 'click') {
-                this.playClick(time, isAccent);
-            } else if (this.soundType === 'beep') {
-                this.playBeep(time, isAccent);
-            } else if (this.soundType === 'woodblock') {
-                this.playWoodblock(time, isAccent);
-            } else if (this.soundType === 'hihat') {
-                this.playHiHat(time, isAccent);
+            const sound = (this.getSoundOverride ? this.getSoundOverride(this.beatCount) : null) || this.soundType;
+            const isWarning = sound === 'warning';
+            const effectiveSound = isWarning ? this.soundType : sound;
+
+            const warningMultiplier = 1.08; // Very subtle 8% pitch increase
+
+            if (effectiveSound === 'click') {
+                this.playClick(time, isAccent, isWarning ? warningMultiplier : 1.0);
+            } else if (effectiveSound === 'beep') {
+                this.playBeep(time, isAccent, isWarning ? warningMultiplier : 1.0);
+            } else if (effectiveSound === 'woodblock' || effectiveSound === 'woodblock-high') {
+                const baseMultiplier = effectiveSound === 'woodblock-high' ? 1.5 : 1.0;
+                this.playWoodblock(time, isAccent, baseMultiplier * (isWarning ? warningMultiplier : 1.0));
+            } else if (effectiveSound === 'hihat') {
+                this.playHiHat(time, isAccent, isWarning ? warningMultiplier : 1.0);
             }
         }
 
@@ -127,16 +135,14 @@ export class MetronomeEngine {
         }
     }
 
-    private playClick(time: number, isAccent: boolean) {
+    private playClick(time: number, isAccent: boolean, pitchMultiplier: number = 1.0) {
         if (!this.audioContext || !this.clickBuffer) return;
 
         const source = this.audioContext.createBufferSource();
         source.buffer = this.clickBuffer;
 
-        // Pitch shift for accent
-        if (isAccent) {
-            source.playbackRate.value = 1.5;
-        }
+        // Pitch shift for accent and warning
+        source.playbackRate.value = (isAccent ? 1.5 : 1.0) * pitchMultiplier;
 
         const gainNode = this.audioContext.createGain();
         gainNode.gain.value = isAccent ? 1.0 : 0.8;
@@ -146,7 +152,7 @@ export class MetronomeEngine {
         source.start(time);
     }
 
-    private playBeep(time: number, isAccent: boolean) {
+    private playBeep(time: number, isAccent: boolean, pitchMultiplier: number = 1.0) {
         if (!this.audioContext) return;
 
         const osc = this.audioContext.createOscillator();
@@ -155,7 +161,7 @@ export class MetronomeEngine {
         osc.connect(gainNode);
         gainNode.connect(this.audioContext.destination);
 
-        const freq = isAccent ? 1200 : 800;
+        const freq = (isAccent ? 1200 : 800) * pitchMultiplier;
         osc.frequency.setValueAtTime(freq, time);
         osc.type = 'sine';
 
@@ -166,7 +172,7 @@ export class MetronomeEngine {
         osc.stop(time + 0.1);
     }
 
-    private playWoodblock(time: number, isAccent: boolean) {
+    private playWoodblock(time: number, isAccent: boolean, freqMultiplier: number = 1.0) {
         if (!this.audioContext) return;
 
         const osc = this.audioContext.createOscillator();
@@ -175,7 +181,8 @@ export class MetronomeEngine {
         osc.connect(gainNode);
         gainNode.connect(this.audioContext.destination);
 
-        const freq = isAccent ? 1000 : 750;
+        const baseFreq = isAccent ? 1000 : 750;
+        const freq = baseFreq * freqMultiplier;
 
         osc.frequency.setValueAtTime(freq, time);
         // Pitch envelope for "wood" sound
@@ -189,18 +196,18 @@ export class MetronomeEngine {
         osc.start(time);
         osc.stop(time + 0.1);
     }
-    private playHiHat(time: number, isAccent: boolean) {
+    private playHiHat(time: number, isAccent: boolean, pitchMultiplier: number = 1.0) {
         if (!this.audioContext) return;
 
         // Bandpass Filter for metallic sound
         const bandpass = this.audioContext.createBiquadFilter();
         bandpass.type = "bandpass";
-        bandpass.frequency.value = 10000;
+        bandpass.frequency.value = 10000 * pitchMultiplier;
 
         // Highpass to remove low rumble
         const highpass = this.audioContext.createBiquadFilter();
         highpass.type = "highpass";
-        highpass.frequency.value = 7000;
+        highpass.frequency.value = 7000 * pitchMultiplier;
 
         // Gain (Envelope)
         const gainNode = this.audioContext.createGain();
