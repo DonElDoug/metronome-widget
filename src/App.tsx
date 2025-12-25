@@ -299,6 +299,23 @@ function App() {
         } : {})
     };
 
+    // Keyboard Shortcuts
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            // Ignore if in an input field (though none exist yet, good practice)
+            if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+
+            if (e.key === 'ArrowRight') {
+                updateBpm(bpm + 1, true);
+            } else if (e.key === 'ArrowLeft') {
+                updateBpm(bpm - 1, true);
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [bpm]); // Listen for bpm changes for updateBpm closure
+
     // Tap tempo logic
     const tapTimesRef = useRef<number[]>([]);
     const lastTapTimeRef = useRef<number>(0);
@@ -561,9 +578,9 @@ function App() {
                                 stateRef.current.speedBarCounter = 0;
                             }}
                             className={`text-[10px] font-bold px-3 py-1.5 rounded-full transition-all border ${(sig.label === 'None' && timeSignature === null) ||
-                                    (timeSignature && timeSignature.numerator === sig.n && timeSignature.denominator === sig.d)
-                                    ? 'bg-neutral-800 text-[var(--accent-color)] border-[var(--accent-color)]'
-                                    : 'text-neutral-500 border-transparent hover:text-neutral-300 hover:bg-neutral-800/50'
+                                (timeSignature && timeSignature.numerator === sig.n && timeSignature.denominator === sig.d)
+                                ? 'bg-neutral-800 text-[var(--accent-color)] border-[var(--accent-color)]'
+                                : 'text-neutral-500 border-transparent hover:text-neutral-300 hover:bg-neutral-800/50'
                                 }`}
                         >
                             {sig.label}
