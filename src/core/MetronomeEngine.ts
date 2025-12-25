@@ -17,6 +17,7 @@ export class MetronomeEngine {
     beatCount = 0;
     beatsPerBar = 4;
     soundType: SoundType = 'click';
+    useAccent = true;
 
     // Callbacks
     onTick: ((beat: number, time: number) => void) | null = null;
@@ -84,6 +85,10 @@ export class MetronomeEngine {
         // but it will affect the next accent calculation.
     }
 
+    setUseAccent(value: boolean) {
+        this.useAccent = value;
+    }
+
     private scheduler() {
         while (this.nextNoteTime < (this.audioContext?.currentTime || 0) + this.scheduleAheadTime) {
             this.scheduleNote(this.nextNoteTime);
@@ -104,7 +109,7 @@ export class MetronomeEngine {
     private scheduleNote(time: number) {
         // Play sound if allowed
         if (!this.shouldPlayNote || this.shouldPlayNote(this.beatCount)) {
-            const isAccent = this.beatCount % this.beatsPerBar === 0;
+            const isAccent = this.useAccent && (this.beatCount % this.beatsPerBar === 0);
 
             if (this.soundType === 'click') {
                 this.playClick(time, isAccent);

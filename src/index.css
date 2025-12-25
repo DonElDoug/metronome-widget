@@ -76,6 +76,58 @@ svg {
     }
 }
 
+@keyframes glow-heartbeat {
+    0% {
+        box-shadow: 0 0 20px 0px color-mix(in srgb, var(--accent-color), transparent 80%);
+        transform: scale(1);
+    }
+
+    5% {
+        box-shadow: 0 0 40px 10px color-mix(in srgb, var(--accent-color), transparent 50%);
+        transform: scale(1.02);
+    }
+
+    50% {
+        box-shadow: 0 0 20px 0px color-mix(in srgb, var(--accent-color), transparent 80%);
+        transform: scale(1);
+    }
+
+    100% {
+        box-shadow: 0 0 20px 0px color-mix(in srgb, var(--accent-color), transparent 80%);
+        transform: scale(1);
+    }
+}
+
+@keyframes ring-heartbeat {
+    0% {
+        filter: drop-shadow(0 0 8px var(--accent-color));
+        stroke-width: 10px;
+    }
+
+    5% {
+        filter: drop-shadow(0 0 20px var(--accent-color));
+        stroke-width: 12px;
+    }
+
+    50% {
+        filter: drop-shadow(0 0 8px var(--accent-color));
+        stroke-width: 10px;
+    }
+
+    100% {
+        filter: drop-shadow(0 0 8px var(--accent-color));
+        stroke-width: 10px;
+    }
+}
+
+.animate-ring-heartbeat {
+    animation: ring-heartbeat var(--beat-duration, 1s) infinite ease-in-out;
+}
+
+.animate-heartbeat {
+    animation: glow-heartbeat var(--beat-duration, 1s) infinite ease-in-out;
+}
+
 /* Glassy 2026 Utilities */
 .glass-ring-base {
     stroke: rgba(255, 255, 255, 0.1);

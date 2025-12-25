@@ -24,7 +24,7 @@ function App() {
     const [speedConfig, setSpeedConfig] = useState<SpeedSettingsData | null>(null);
     const [randomConfig, setRandomConfig] = useState<RandomSettingsData | null>(null);
     const [soundType, setSoundType] = useState<SoundType>('click');
-    const [timeSignature, setTimeSignature] = useState({ numerator: 4, denominator: 4 });
+    const [timeSignature, setTimeSignature] = useState<{ numerator: number, denominator: number } | null>({ numerator: 4, denominator: 4 });
 
     // Visual Sync Queue
     const visualQueueRef = useRef<{ time: number; beat: number }[]>([]);
@@ -136,7 +136,8 @@ function App() {
 
         // Glassy Flash Logic (Normal Mode)
         if (!speedConfig && visualizerRef.current && isPlaying) {
-            const currentBeat = (stateRef.current.speedBarCounter % timeSignature.numerator) + 1; // 1-based beat
+            const isNoAccent = !timeSignature;
+            const currentBeat = isNoAccent ? 2 : (stateRef.current.speedBarCounter % timeSignature.numerator) + 1; // 1-based beat
             stateRef.current.speedBarCounter++; // Use counter as beat tracker for Normal Mode too
 
             // Reset any residual animations
@@ -484,8 +485,8 @@ function App() {
                     {/* The Ripple Orb (Interactive) - Progress Ring */}
                     <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
                         <svg className="w-[21vmin] h-[21vmin] rotate-[-90deg]" viewBox="0 0 200 200">
-                            {/* Base Ring (Subtle Guide) */}
-                            <circle cx="100" cy="100" r="56" fill="none" stroke="currentColor" strokeWidth="4" className="opacity-60" style={{ color: 'var(--accent-color)' }} />
+                            {/* Base Ring (Track - Neutral Dark) */}
+                            <circle cx="100" cy="100" r="56" fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="6" className="opacity-100" />
 
                             {/* Active Ring (Breathing/Progress) */}
                             <circle
@@ -493,17 +494,17 @@ function App() {
                                 cx="100" cy="100" r="56"
                                 fill="none"
                                 stroke="currentColor"
-                                strokeWidth="5"
+                                strokeWidth="10"
                                 strokeLinecap="round"
-                                className={`chrono-ring glass-ring-base`}
                                 style={{
                                     stroke: 'var(--accent-color)',
                                     strokeDasharray: 2 * Math.PI * 56,
                                     strokeDashoffset: speedConfig ? 2 * Math.PI * 56 : 0,
                                     opacity: speedConfig ? 1 : 0.8,
                                     transition: 'all 0.1s ease-out',
-                                    filter: 'drop-shadow(0 0 6px var(--accent-color))'
+                                    filter: 'drop-shadow(0 0 8px var(--accent-color))'
                                 }}
+                                className={`chrono-ring glass-ring-base ${isPlaying && speedConfig ? 'animate-ring-heartbeat' : ''}`}
                             />
                         </svg>
                     </div>
@@ -524,13 +525,7 @@ function App() {
                         }}
                     >
                         {/* Inner Soft Glow */}
-                        <div
-                            className={`absolute inset-0 transition-opacity duration-500 ease-in-out ${isPlaying ? 'opacity-60' : 'opacity-0'}`}
-                            style={{
-                                background: 'radial-gradient(circle at center, var(--accent-color), transparent 70%)',
-                                filter: 'blur(10px)'
-                            }}
-                        />
+
 
                         {isPlaying ? (
                             <div className="flex gap-2.5 z-10 transition-transform duration-300 scale-90">
@@ -538,7 +533,7 @@ function App() {
                                 <div className="w-2 h-8 bg-current rounded-full opacity-90 shadow-[0_0_10px_currentColor]" />
                             </div>
                         ) : (
-                            <Play size={48} className="ml-1.5 z-10 text-current opacity-100 transition-transform duration-300 hover:scale-110" fill="currentColor" />
+                            <Play size={48} className="ml-1.5 z-10 text-current opacity-100 transition-transform duration-300 hover:scale-110" fill="currentColor" style={{ filter: 'drop-shadow(0 0 8px currentColor)' }} />
                         )}
                     </button>
                 </div>
@@ -548,19 +543,27 @@ function App() {
                         { n: 4, d: 4, label: '4/4' },
                         { n: 3, d: 4, label: '3/4' },
                         { n: 2, d: 4, label: '2/4' },
-                        { n: 6, d: 8, label: '6/8' }
+                        { n: 6, d: 8, label: '6/8' },
+                        { n: 0, d: 0, label: 'None' }
                     ].map((sig) => (
                         <button
                             key={sig.label}
                             onClick={() => {
-                                setTimeSignature({ numerator: sig.n, denominator: sig.d });
-                                stateRef.current.timeSignature = { numerator: sig.n, denominator: sig.d };
+                                if (sig.label === 'None') {
+                                    setTimeSignature(null);
+                                    engine.setUseAccent(false);
+                                } else {
+                                    setTimeSignature({ numerator: sig.n, denominator: sig.d });
+                                    stateRef.current.timeSignature = { numerator: sig.n, denominator: sig.d };
+                                    engine.setBeatsPerBar(sig.n);
+                                    engine.setUseAccent(true);
+                                }
                                 stateRef.current.speedBarCounter = 0;
-                                engine.setBeatsPerBar(sig.n);
                             }}
-                            className={`text-[10px] font-bold px-3 py-1.5 rounded-full transition-all border ${timeSignature.numerator === sig.n && timeSignature.denominator === sig.d
-                                ? 'bg-neutral-800 text-[var(--accent-color)] border-[var(--accent-color)]'
-                                : 'text-neutral-500 border-transparent hover:text-neutral-300 hover:bg-neutral-800/50'
+                            className={`text-[10px] font-bold px-3 py-1.5 rounded-full transition-all border ${(sig.label === 'None' && timeSignature === null) ||
+                                    (timeSignature && timeSignature.numerator === sig.n && timeSignature.denominator === sig.d)
+                                    ? 'bg-neutral-800 text-[var(--accent-color)] border-[var(--accent-color)]'
+                                    : 'text-neutral-500 border-transparent hover:text-neutral-300 hover:bg-neutral-800/50'
                                 }`}
                         >
                             {sig.label}
