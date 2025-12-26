@@ -194,7 +194,10 @@ function App() {
         const totalBeatsInStep = speedConfig.bars * beatsPerBar;
         const currentBeatInStep = (beatTotal % totalBeatsInStep) + 1;
 
-        // Visualizer Update (Layered Ripple Style)
+        // Accurate detection of the absolute final step of the session
+        const isFinalStep = bpm >= speedConfig.endBpm;
+
+        // Visualizer Update
         if (visualizerRef.current) {
             const progress = Math.min(currentBeatInStep / totalBeatsInStep, 1);
             const circumference = 2 * Math.PI * 56;
@@ -213,14 +216,19 @@ function App() {
         }
 
         if (currentBeatInStep === totalBeatsInStep) {
-            if (bpm >= speedConfig.endBpm) {
+            if (isFinalStep) {
+                // SESSION COMPLETE
                 engine.stop();
                 timer.stop();
+                timer.setTime(0); // Snap timer to zero
                 setIsPlaying(false);
                 setSpeedConfig(null);
-                const flute = new Audio('/audio/flute_japan.mp3');
-                flute.play().catch(e => console.error("Flute play error", e));
+                setSpeedCountdown(null);
+
+                // Orchestrate finish sound via high-precision engine
+                engine.playFlute();
             } else {
+                // STEP COMPLETE - Move to next BPM
                 let newBpm = bpm + speedConfig.increment;
                 if (newBpm > speedConfig.endBpm) newBpm = speedConfig.endBpm;
                 engine.setBpm(newBpm);
@@ -328,6 +336,9 @@ function App() {
         const handleKeyDown = (e: KeyboardEvent) => {
             // Ignore if in an input field (though none exist yet, good practice)
             if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+
+            // Block BPM changes during Speed Mode
+            if (speedConfig) return;
 
             if (e.key === 'ArrowRight') {
                 updateBpm(bpm + 1, true);
@@ -479,7 +490,8 @@ function App() {
                         <div className="flex items-center justify-center gap-[2vw] w-full" style={{ color: 'var(--accent-color)' }}>
                             <button
                                 onClick={() => updateBpm(bpm - 1, true)}
-                                className="p-[1.5vmin] hover:scale-110 active:scale-95 transition-all duration-300 opacity-30 hover:opacity-100 group"
+                                disabled={!!speedConfig}
+                                className={`p-[1.5vmin] hover:scale-110 active:scale-95 transition-all duration-300 group ${speedConfig ? 'opacity-10 cursor-not-allowed' : 'opacity-30 hover:opacity-100'}`}
                             >
                                 <Minus size={48} strokeWidth={1} className="transition-all" />
                             </button>
@@ -493,7 +505,8 @@ function App() {
 
                             <button
                                 onClick={() => updateBpm(bpm + 1, true)}
-                                className="p-[1.5vmin] hover:scale-110 active:scale-95 transition-all duration-300 opacity-30 hover:opacity-100 group"
+                                disabled={!!speedConfig}
+                                className={`p-[1.5vmin] hover:scale-110 active:scale-95 transition-all duration-300 group ${speedConfig ? 'opacity-10 cursor-not-allowed' : 'opacity-30 hover:opacity-100'}`}
                             >
                                 <Plus size={48} strokeWidth={1} className="transition-all" />
                             </button>
@@ -513,7 +526,7 @@ function App() {
                 {speedCountdown !== null && (
                     <div className="absolute top-[55%] left-1/2 -translate-x-1/2 flex flex-col items-center gap-0 z-50 pointer-events-none">
                         <div className="text-[9px] uppercase tracking-[0.4em] text-white opacity-60 font-bold mb-1">
-                            Changing in
+                            {speedConfig && bpm === speedConfig.endBpm ? "Finish in" : "Changing in"}
                         </div>
                         <div className="text-4xl font-black text-[var(--accent-color)] drop-shadow-[0_0_12px_var(--accent-color)]">
                             {speedCountdown}

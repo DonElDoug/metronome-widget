@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useCallback } from 'react';
 
 // Modes
 export enum TimerMode {
@@ -20,11 +20,6 @@ export function useTimer() {
 
     const lastTimestamp = useRef<number | null>(null);
     const rafId = useRef<number | null>(null);
-    const fluteAudio = useRef<HTMLAudioElement | null>(null);
-
-    useEffect(() => {
-        fluteAudio.current = new Audio('/audio/flute_japan.mp3');
-    }, []);
 
     const tick = useCallback((timestamp: number) => {
         if (!isRunningRef.current) return;
@@ -44,7 +39,6 @@ export function useTimer() {
                     stop();
                     setMode(TimerMode.Idle);
                     modeRef.current = TimerMode.Idle;
-                    fluteAudio.current?.play().catch(e => console.error("Audio play failed", e));
                     return 0;
                 }
                 return nextTime;

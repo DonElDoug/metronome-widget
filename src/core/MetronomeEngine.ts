@@ -26,13 +26,15 @@ export class MetronomeEngine {
 
     // Sound buffers
     clickBuffer: AudioBuffer | null = null;
+    fluteBuffer: AudioBuffer | null = null;
 
     constructor() { }
 
     async init() {
         if (!this.audioContext) {
             this.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-            await this.loadSound('./audio/click.wav');
+            await this.loadSound('./audio/click.wav', 'click');
+            await this.loadSound('./audio/flute_japan.mp3', 'flute');
         }
 
         if (this.audioContext && this.audioContext.state === 'suspended') {
@@ -40,14 +42,16 @@ export class MetronomeEngine {
         }
     }
 
-    async loadSound(url: string) {
+    async loadSound(url: string, type: 'click' | 'flute') {
         if (!this.audioContext) return;
         try {
             const response = await fetch(url);
             const arrayBuffer = await response.arrayBuffer();
-            this.clickBuffer = await this.audioContext.decodeAudioData(arrayBuffer);
+            const decodedBuffer = await this.audioContext.decodeAudioData(arrayBuffer);
+            if (type === 'click') this.clickBuffer = decodedBuffer;
+            if (type === 'flute') this.fluteBuffer = decodedBuffer;
         } catch (error) {
-            console.error('Error loading sound:', error);
+            console.error(`Error loading ${type} sound:`, error);
         }
     }
 
@@ -238,5 +242,19 @@ export class MetronomeEngine {
         // Clean up noise source automatically or slightly after
         // Note: noise buffer is short, but we can stop explicitely
         noise.stop(time + 0.1);
+    }
+
+    playFlute() {
+        if (!this.audioContext || !this.fluteBuffer) return;
+
+        const source = this.audioContext.createBufferSource();
+        source.buffer = this.fluteBuffer;
+
+        const gainNode = this.audioContext.createGain();
+        gainNode.gain.value = 1.0;
+
+        source.connect(gainNode);
+        gainNode.connect(this.audioContext.destination);
+        source.start(this.audioContext.currentTime);
     }
 }
