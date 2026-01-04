@@ -5,9 +5,10 @@ interface TimerDisplayProps {
     onAddFiveMinutes: () => void;
     onReset: () => void;
     showReset: boolean;
+    isLocked?: boolean;
 }
 
-export function TimerDisplay({ timeMs, onAddFiveMinutes, onReset, showReset }: TimerDisplayProps) {
+export function TimerDisplay({ timeMs, onAddFiveMinutes, onReset, showReset, isLocked }: TimerDisplayProps) {
 
     const formatTime = (ms: number) => {
         if (ms < 0) ms = 0;
@@ -35,8 +36,11 @@ export function TimerDisplay({ timeMs, onAddFiveMinutes, onReset, showReset }: T
     };
 
     return (
-        <div className="flex flex-col items-center justify-center py-[0.5vh]" onClick={onAddFiveMinutes}>
-            <div className="text-white transition-all duration-300 cursor-pointer select-none">
+        <div
+            className={`flex flex-col items-center justify-center py-[0.5vh] ${isLocked ? 'cursor-default' : 'cursor-pointer'}`}
+            onClick={() => !isLocked && onAddFiveMinutes()}
+        >
+            <div className="text-white transition-all duration-300 select-none">
                 {formatTime(timeMs)}
             </div>
 

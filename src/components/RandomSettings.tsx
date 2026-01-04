@@ -16,10 +16,9 @@ export interface RandomSettingsData {
 
 export function RandomSettings({ isOpen, onClose, onSave }: RandomSettingsProps) {
     const [percentage, setPercentage] = useState(50);
-    const [bars, setBars] = useState(10);
 
     const handleSave = () => {
-        onSave({ enabled: true, percentage, bars });
+        onSave({ enabled: true, percentage, bars: 10 });
         onClose();
     };
 
@@ -35,14 +34,7 @@ export function RandomSettings({ isOpen, onClose, onSave }: RandomSettingsProps)
                     unit="%"
                 />
 
-                <Slider
-                    label="Pattern Length (Bars)"
-                    value={bars}
-                    min={1}
-                    max={16}
-                    onChange={setBars}
-                    unit=" bars"
-                />
+
 
                 <div className="bg-neutral-850 p-4 rounded-xl text-sm text-neutral-400">
                     <p>Randomly silences bars to help you test your internal clock.</p>

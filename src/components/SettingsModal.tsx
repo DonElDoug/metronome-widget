@@ -98,7 +98,7 @@ export function SettingsModal({ isOpen, onClose, onSoundChange, currentSound }: 
 
     return (
         <Modal isOpen={isOpen} onClose={onClose} title="Settings">
-            <div className="space-y-4 scrollbar-hide">
+            <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-white/10">
 
                 {/* Presets */}
                 <div className="bg-white/5 p-4 rounded-3xl border border-white/5">
@@ -120,8 +120,8 @@ export function SettingsModal({ isOpen, onClose, onSoundChange, currentSound }: 
                     </div>
                 </div>
 
-                {/* 2-Column Grid for Colors */}
-                <div className="grid grid-cols-2 gap-[2vmin]">
+                {/* 2-Column Grid for Colors - Stacked on Mobile */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {/* Mode Colors */}
                     <div className="space-y-4 bg-white/5 p-4 rounded-3xl border border-white/5">
                         <h3 className="text-[10px] text-neutral-500 font-bold uppercase tracking-widest flex items-center gap-2">
@@ -179,8 +179,8 @@ export function SettingsModal({ isOpen, onClose, onSoundChange, currentSound }: 
                     </div>
                 </div>
 
-                {/* Bottom Bar: Sound & Done */}
-                <div className="flex flex-row flex-wrap items-center gap-[2vmin] bg-white/5 p-[2vmin] rounded-3xl border border-white/5">
+                {/* Bottom Bar: Sound & Done - Responsive Wrap */}
+                <div className="flex flex-col sm:flex-row items-center gap-4 bg-white/5 p-4 rounded-3xl border border-white/5">
                     <div className="flex-1 w-full">
                         <select
                             value={currentSound}
@@ -196,7 +196,7 @@ export function SettingsModal({ isOpen, onClose, onSoundChange, currentSound }: 
 
                     <button
                         onClick={onClose}
-                        className="w-auto min-w-[20vmin] bg-white text-black hover:bg-neutral-200 font-bold py-3 px-6 rounded-xl transition-all shadow-lg active:scale-95"
+                        className="w-full sm:w-auto min-w-[120px] bg-white text-black hover:bg-neutral-200 font-bold py-3 px-6 rounded-xl transition-all shadow-lg active:scale-95"
                     >
                         Done
                     </button>

@@ -40,6 +40,7 @@ function App() {
         speedBarCounter: 0,
         randomBarCounter: 0,
         randomPattern: [] as boolean[],
+        barVisibilityCache: new Map<number, boolean>(),
         lastBeatTime: 0,
         timeSignature: { numerator: 4, denominator: 4 }, // Standard for internal logic when TS is None
     });
@@ -84,22 +85,65 @@ function App() {
             return null;
         };
 
-        const barVisibilityCache = new Map<number, boolean>();
+        function getBarVisibility(barIdx: number, percentage: number, patternLength: number, _beatInBar: number) {
+            const cache = stateRef.current.barVisibilityCache;
+            if (cache.has(barIdx)) return cache.get(barIdx)!;
 
-        function getBarVisibility(barIdx: number, percentage: number, _patternLength: number, _beatInBar: number) {
-            if (barVisibilityCache.has(barIdx)) return barVisibilityCache.get(barIdx)!;
+            // Generate a 10-bar block with quota
+            const blockStartIdx = Math.floor(barIdx / patternLength) * patternLength;
+            const toMuteCount = Math.round((percentage / 100) * patternLength);
 
-            const isSilent = Math.random() * 100 < percentage;
-            const result = (barIdx === 0) ? true : !isSilent; // First bar always audible
+            // Special handling for the very first block of the session (bar 0)
+            const isFirstBlock = (blockStartIdx === 0);
 
-            barVisibilityCache.set(barIdx, result);
+            let blockPattern: boolean[] = [];
 
-            if (barVisibilityCache.size > 20) {
-                const keys = Array.from(barVisibilityCache.keys()).sort((a, b) => a - b);
-                if (keys.length > 0) barVisibilityCache.delete(keys[0]);
+            if (isFirstBlock) {
+                // Bar 0 is audible, distribute remaining mutes in 9 slots
+                const remainingMutes = toMuteCount;
+                const remainingAudible = (patternLength - 1) - remainingMutes;
+
+                const pool = [
+                    ...new Array(remainingMutes).fill(false),
+                    ...new Array(remainingAudible).fill(true)
+                ];
+
+                // Shuffle pool
+                for (let i = pool.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [pool[i], pool[j]] = [pool[j], pool[i]];
+                }
+
+                blockPattern = [true, ...pool]; // Bar 0 is first
+            } else {
+                // Regular block: exactly toMuteCount silent bars
+                const pool = [
+                    ...new Array(toMuteCount).fill(false),
+                    ...new Array(patternLength - toMuteCount).fill(true)
+                ];
+
+                // Shuffle pool
+                for (let i = pool.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [pool[i], pool[j]] = [pool[j], pool[i]];
+                }
+                blockPattern = pool;
             }
 
-            return result;
+            // Fill cache for the whole block
+            blockPattern.forEach((val, i) => {
+                cache.set(blockStartIdx + i, val);
+            });
+
+            // Cleanup old cache entries
+            if (cache.size > 40) {
+                const keys = Array.from(cache.keys()).sort((a, b) => a - b);
+                for (let i = 0; i < 10 && keys.length > i; i++) {
+                    cache.delete(keys[i]);
+                }
+            }
+
+            return cache.get(barIdx) ?? true;
         }
 
         engine.onTick = (beat, time) => {
@@ -186,53 +230,62 @@ function App() {
         }
     };
 
+
+
     const handleSpeedModeTick = (beatTotal: number) => {
         const { speedConfig, bpm, timeSignature } = stateRef.current;
         if (!speedConfig) return;
 
         const beatsPerBar = timeSignature?.numerator || 4;
         const totalBeatsInStep = speedConfig.bars * beatsPerBar;
-        const currentBeatInStep = (beatTotal % totalBeatsInStep) + 1;
 
-        // Accurate detection of the absolute final step of the session
-        const isFinalStep = bpm >= speedConfig.endBpm;
+        // currentBeatInStep is 0-indexed relative to the start of the current step
+        // We use Math.floor because beatTotal is an absolute counter from start
+        const currentBeatInStep = (beatTotal % totalBeatsInStep);
 
         // Visualizer Update
         if (visualizerRef.current) {
-            const progress = Math.min(currentBeatInStep / totalBeatsInStep, 1);
+            const progress = Math.min((currentBeatInStep + 1) / totalBeatsInStep, 1);
             const circumference = 2 * Math.PI * 56;
             const offset = circumference * (1 - progress);
             visualizerRef.current.style.strokeDashoffset = offset.toString();
         }
 
-        // Countdown Logic
-        const warningStartBeat = totalBeatsInStep - beatsPerBar + 1;
+        // Countdown Logic (Warning for the next step or finish)
+        const warningStartBeat = totalBeatsInStep - beatsPerBar;
 
         if (currentBeatInStep >= warningStartBeat) {
-            const countdownValue = totalBeatsInStep - currentBeatInStep + 1;
+            const countdownValue = totalBeatsInStep - currentBeatInStep;
             setSpeedCountdown(countdownValue);
         } else {
             setSpeedCountdown(null);
         }
 
-        if (currentBeatInStep === totalBeatsInStep) {
-            if (isFinalStep) {
+        // Transition Logic: Check if we just COMPLETED a cycle
+        // This is triggered at the START of the first beat of the NEXT cycle (or stop point)
+        if (beatTotal > 0 && beatTotal % totalBeatsInStep === 0) {
+            const isFinalStepComplete = bpm >= speedConfig.endBpm;
+
+            if (isFinalStepComplete) {
                 // SESSION COMPLETE
                 engine.stop();
                 timer.stop();
-                timer.setTime(0); // Snap timer to zero
+                timer.setTime(0);
                 setIsPlaying(false);
                 setSpeedConfig(null);
                 setSpeedCountdown(null);
-
-                // Orchestrate finish sound via high-precision engine
                 engine.playFlute();
             } else {
                 // STEP COMPLETE - Move to next BPM
                 let newBpm = bpm + speedConfig.increment;
                 if (newBpm > speedConfig.endBpm) newBpm = speedConfig.endBpm;
+
+                // CRITICAL: Update stateRef synchronously so the NEXT scheduler call 
+                // (which hasn't happened yet for this beat) uses the correct BPM.
+                stateRef.current.bpm = newBpm;
                 engine.setBpm(newBpm);
                 setBpm(newBpm);
+
                 if (visualizerRef.current) {
                     visualizerRef.current.style.strokeDashoffset = (2 * Math.PI * 56).toString();
                 }
@@ -303,6 +356,7 @@ function App() {
     const handleRandomSave = (data: RandomSettingsData) => {
         setRandomConfig(data);
         setSpeedConfig(null);
+        stateRef.current.barVisibilityCache.clear();
     };
 
     const visualizerRef = useRef<SVGCircleElement>(null);
@@ -468,7 +522,7 @@ function App() {
                     <div className="mb-[2vh]">
                         <TimerDisplay
                             timeMs={timer.timeMs}
-                            onAddFiveMinutes={() => timer.addTime(5 * 60 * 1000)}
+                            onAddFiveMinutes={() => !speedConfig && timer.addTime(5 * 60 * 1000)}
                             onReset={() => {
                                 timer.reset();
                                 setIsPlaying(false);
@@ -483,6 +537,7 @@ function App() {
                             }
                             }
                             showReset={!speedConfig && timer.timeMs > 0}
+                            isLocked={!!speedConfig}
                         />
                     </div>
 

@@ -16,13 +16,13 @@ export function ColorInput({ label, value, onChange }: ColorInputProps) {
                 {label}
             </label>
 
-            <div className="flex items-center gap-3">
-                <span className="font-mono text-xs opacity-50 uppercase" style={{ color: 'var(--text-color)' }}>
+            <div className="flex items-center gap-2 sm:gap-3">
+                <span className="font-mono text-[10px] sm:text-xs opacity-50 uppercase" style={{ color: 'var(--text-color)' }}>
                     {value}
                 </span>
 
                 <div
-                    className="relative w-10 h-10 rounded-full overflow-hidden shadow-lg border-2 border-white/10 group-hover:scale-110 transition-transform duration-300"
+                    className="relative w-8 h-8 sm:w-10 sm:h-10 rounded-full overflow-hidden shadow-lg border-2 border-white/10 group-hover:scale-110 transition-transform duration-300"
                     style={{ backgroundColor: value }}
                 >
                     <input

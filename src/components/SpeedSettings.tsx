@@ -38,10 +38,15 @@ export function SpeedSettings({ isOpen, onClose, onSave, currentTimeSignature }:
         if (initial >= fin) return (barCount * clicks * 60) / initial;
         let totalSeconds = 0;
         let currentBpm = initial;
+
+        // Sum durations of all steps except the last one
         while (currentBpm < fin) {
             totalSeconds += (barCount * clicks * 60) / currentBpm;
             currentBpm += inc;
         }
+
+        // Add duration of the final step (the target endBpm)
+        // This ensures the 105bpm cycle is included in the estimate.
         totalSeconds += (barCount * clicks * 60) / fin;
         return totalSeconds;
     };
